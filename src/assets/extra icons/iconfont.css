@@ -1,0 +1,36 @@
+@font-face {font-family: "fontFamily";
+  src: url('iconfont.eot?t=1548322423637'); /* IE9 */
+  src: url('iconfont.eot?t=1548322423637#iefix') format('embedded-opentype'), /* IE6-IE8 */
+  url('data:application/x-font-woff2;charset=utf-8;base64,d09GMgABAAAAAASgAAsAAAAACRgAAARTAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHEIGVgCDHAqFQIRLATYCJAMQCwoABCAFhQUHQRvOB8gOJYnAwADgAUhQBI/7lfOSLGWPwRG2bNFW1SMIy7pnfS1aJFv1p3DTDxRKP3VJxY2azDSDh1EkuZBONEwVfCIu/3PMePV8uOffBgDRYVlYAZrBA+m8KIoCvwaWY79h7PIiTxOoliTAzorrOwKRQp8UiHsKOQlECbFSgQ1dXrtgZQFxCAS6aSLvDF54vx8/HYQISFoZ6Ge6eKNSCkq+OD77l7n/nJ5ZB7jhlGDryNgCFOJWofoKfmDdwldldzvHAV1DmRiq49SzD02DqVthd/G/PEKSiTbQ2QMIc9SW+eJo4Qm+5OJJfPkgliGqcLvQ/huIIYhZeMGkSFfDnJ0h5hcz1OBnMAFujqc+Qn+l47VrUdu8jcFWW8D889ldTkdvj1++2qbztq6KMlq9/Y32FefZbD7zQmzXD+/ffRyffHTnTq+1V4PmBhoMFk+zeQkiwB56vdlTb7HsjFxqeOfWLN3r13dyD4bOVm+TS8CKKKjXQzmLl6/ZN9AM/DdZuRQfil170xleedURwOIikMIuy9Zh8/dP3htkXhPRwxFbfL0KP/o6FGgfeUr1k1ZhGEQ43Wof/DKTvZChC4+7AuEkI+at05lMOD75MsbXHYKozOjtbSz4264WcvWNPg6u0LetTTzw2b24jbzF2Jtl485xy2vCAho7CWCNbyiKmdlTPsHfxWel87gdDfPIm5dmxrMTheJiz5pBnz7P+Ab1ela7lvNrKOsikowQh0ScdF6UYjvh8us0HZAcfM9x16RrkdzyXQushycK6tMe4knOlalxpsvuC5BzuunMepfPK4Y0pzEpIsGn0noB2Hu/awGPNhhoHjQJ7nvg0Qt6R92J8juwLHqjf0cf/t0Lb/nCjv69nD0X+NbW0pCrqfVdAG6MdLIEBEwMDHc2vnJKcz4xlHbgldEpPNDi72/ZtkJT1KVL0XL7CfZQhCcMEC4PA2EPwz+ELxKWgLIRLztErHE3QANouPwo6wBo9JniIwDIh7xzf8oo/5s8Evu4FHwV4U+q7B21fKBnargCulFeN6Ux5b+gNEwrCk2XlCLRLbKqKZ7HJkmoKv4GJ2PuDcGdbOxPqCYjSDqWIatWEAWzBy19p6GtOgfVpqb1feOG4IviANgwFUCYsB2SIS8hm3ATUTBvoWUqMGibCB+oLkX8jn0roYPlDCJZJCX6DSYUEkojM0UstL8mJtUK1eBWJG9XkUwqLPhKZ8RoFZSGSE1KyXFUIQ1ihpqjHSBPY1kZIWMoNSGuPhtSqSiCZqg2JGGT+rMsnZecLCu6pyQJpQbQGQyExEKkCP0MRlCQoGjIHD0LBvuIkdQUVAZrhci1c7lJTGXMrHtnCEMLScXdE1IlSWmEqGJrGkZd2jytAeTSsFgyBHNnUNQISBmCiRRvFQqBLh7WBpFgJenfwUzLk2xkkzVlJ22aq77bdVDp1y7Bw/iYHSYAncuKxHYtYuzUCjUplCKNXNUOAAA=') format('woff2'),
+  url('iconfont.woff?t=1548322423637') format('woff'),
+  url('iconfont.ttf?t=1548322423637') format('truetype'), /* chrome, firefox, opera, Safari, Android, iOS 4.2+ */
+  url('iconfont.svg?t=1548322423637#fontFamily') format('svg'); /* iOS 4.1- */
+}
+[class^="el-icon-erp"], [class*=" el-icon-erp"] {
+  font-family:"fontFamily" !important;
+  /* 以下内容参照第三方图标库本身的规则 */
+  font-size: 18px;
+  font-style:normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.fontFamily {
+  font-family: "fontFamily" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.el-icon-erp-ai-user:before {
+  content: "\e60c";
+}
+
+.el-icon-erp-mima:before {
+  content: "\e639";
+}
+
+.el-icon-erp-denglu:before {
+  content: "\e6f0";
+}
+
