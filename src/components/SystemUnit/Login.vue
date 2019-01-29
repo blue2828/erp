@@ -43,10 +43,32 @@
           switch (this.loginForm.account) {
             case '' :
               this.$message({
-
+                showClose: true,
+                message: '请输入账号',
+                type: 'error'
               });
-              break;
+              return;
           }
+          switch (this.loginForm.password) {
+            case '' :
+            this.$message({
+              showClose: true,
+              message: '请输入密码',
+              type: 'error'
+            });
+            return;
+          }
+          this.$http.get('/api/sys/usr/validateUser').then((res) => {
+            alert(res.msg);
+            alert(res.data.msg);
+          }).catch(() => {
+            console.log("检查服务器");
+            this.$message({
+              showClose: true,
+              message: '检查服务器',
+              type: 'error'
+            });
+          });
         }
       }
 
