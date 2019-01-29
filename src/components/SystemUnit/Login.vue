@@ -9,7 +9,8 @@
           <el-input style="margin-top: 40px;" class="inputSize" placeholder="账号/姓名"  prefix-icon="el-icon-erp-ai-user" v-model="loginForm.account"/>
         </el-form-item>
         <el-form-item>
-          <el-input style="margin-top: 10px;" class="inputSize" type="password" placeholder="密码"  prefix-icon="el-icon-erp-mima" @keyup.enter.native="doLogin" v-model="loginForm.password"/>
+          <el-input style="margin-top: 10px;" class="inputSize" type="password" placeholder="密码"  prefix-icon="el-icon-erp-mima"
+                    @keyup.enter.native="doLogin" v-model="loginForm.password"/>
         </el-form-item>
         <el-form-item>
           <el-checkbox v-model="rememberMe" class="rememberMe">记住我</el-checkbox>
@@ -39,7 +40,13 @@
       name: "Login",
       methods: {
         doLogin () {
-          alert('tijiao');
+          switch (this.loginForm.account) {
+            case '' :
+              this.$message({
+
+              });
+              break;
+          }
         }
       }
 
