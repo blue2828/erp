@@ -58,14 +58,30 @@
             });
             return;
           }
-          this.$http.get('/api/sys/usr/validateUser').then((res) => {
-            alert(res.msg);
-            alert(res.data.msg);
-          }).catch(() => {
-            console.log("检查服务器");
+          this.$http.get('/api/sys/usr/validateUser', {
+              params: {
+                userNameOrId: this.loginForm.account,
+                password: this.loginForm.password,
+                rememberMe: this.rememberMe
+              }
+            }).then((res) => {
+              let msg = res.data.msg;
+              switch (res.data.success) {
+                case true :
+                  alert('ok');
+                  break;
+                default :
+                  this.$message({
+                    showClose: true,
+                    message: msg,
+                    type: 'error'
+                  });
+              }
+            }).catch(() => {
+            console.log("服务器访问失败");
             this.$message({
               showClose: true,
-              message: '检查服务器',
+              message: '服务器访问失败',
               type: 'error'
             });
           });
