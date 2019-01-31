@@ -7,12 +7,13 @@ import router from './router'
 import Login from '@/components/SystemUnit/Login'
 import './assets/extra icons/iconfont.css'
 import axios from 'axios'
+import App from './App'
 Vue.prototype.$http = axios;
 Vue.config.productionTip = false
 Vue.use(ElementUI);
 new Vue({
   el: '#app',
   router,
-  components: { Login },
-  template: '<Login/>'
+  components: { App },
+  template: '<App/>'
 })
