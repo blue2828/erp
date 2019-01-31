@@ -68,7 +68,7 @@
               let msg = res.data.msg;
               switch (res.data.success) {
                 case true :
-                  alert('ok');
+                  this.$router.push('index');
                   break;
                 default :
                   this.$message({
