@@ -86,8 +86,18 @@
             });
           });
         }
+      },
+      mounted() {
+        this.$http.get('/api/sys/usr/isLogined').then((res) => {
+          switch (res.data.isLogined) {
+            case true :
+              this.$router.push('index');
+              break;
+          }
+        }).catch((e) => {
+          console.log('=====服务器访问失败===' + e.message());
+        });
       }
-
     }
 </script>
 
