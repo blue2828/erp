@@ -1,7 +1,6 @@
 <template>
   <el-container style="width: 100%; height: 100%;display: flex; position: fixed;top: 0;bottom: 0;left: 0;right: 0;">
     <el-header>
-    <div class="line"></div>
     <el-menu
       style="width: 100%;display: flex;position: fixed;top: 0;left: 0;right: 0;float: right;"
       :default-active="this.$router.path"
@@ -11,20 +10,7 @@
       background-color="#545c64"
       text-color="#fff"
       active-text-color="#ffd04b">
-      <el-menu-item index="1">处理中心</el-menu-item>
-      <el-submenu index="2">
-        <template slot="title">我的工作台</template>
-        <el-menu-item index="2-1">选项1</el-menu-item>
-        <el-menu-item index="2-2">选项2</el-menu-item>
-        <el-menu-item index="2-3">选项3</el-menu-item>
-        <el-submenu index="2-4">
-          <template slot="title">选项4</template>
-          <el-menu-item index="2-4-1">选项1</el-menu-item>
-          <el-menu-item index="2-4-2">选项2</el-menu-item>
-          <el-menu-item index="2-4-3">选项3</el-menu-item>
-        </el-submenu>
-      </el-submenu>
-      <el-menu-item index="3" disabled>消息中心</el-menu-item>
+      <div style="color: white;font-size: 18px;width: 60%;text-align: left;margin-left: 30px;">进销存后台管理</div>
       <el-menu-item index="4"><a href="https://www.ele.me" target="_blank">订单管理</a></el-menu-item>
     </el-menu>
 
@@ -32,6 +18,11 @@
     <el-container>
       <el-aside :width="asideWidth">
         <el-menu router :default-active="defaultUrl" :collapse="isCollapse">
+          <el-menu-item index="logo" :style="logoItemHeight" style="padding-top: 0;">
+            <div class="imgContainer" :style="imgContainerCss">
+              <img :src="imgSrc" class="imgHeader" :style="imgCss">
+            </div>
+          </el-menu-item>
           <el-submenu index="0">
             <template slot="title">
               <i class="el-icon-erp-caigoudingdan"></i>
@@ -130,6 +121,9 @@
   import indent_selected from '@/assets/images/indent_selected.png';
   import outdent from '@/assets/images/outdent.png';
   import outdent_selected from '@/assets/images/outdent_selected.png';
+  import manHeader from '@/assets/images/manHeader.jpg';
+  import wmHeader from '@/assets/images/wmHeader.jpg';
+  import Login from './Login';
   export default {
     name: 'Index',
     data() {
@@ -140,15 +134,30 @@
         isCollapse: false,
         asideWidth: '200px',
         imgLeftBorder: '220px',
-        defaultUrl: '/index'
+        defaultUrl: '/userManage',
+        imgSrc: manHeader,
+        imgContainerCss: {
+          margin: '8px 0 0 30px',
+          width: '80px',
+          height: '80px'
+        },
+        imgCss: {
+          width: '80px',
+          height: '80px'
+        },
+        logoItemHeight: { height: '100px' }
       };
     },
     methods: {
       doCollapse () {
         this.isCollapse = ! this.isCollapse;
-        this.toggle_img = this.isCollapse ? outdent : indent
-        this.asideWidth = this.isCollapse ? '65px' : '200px'
-        this.imgLeftBorder = this.isCollapse ? '85px' : '220px'
+        this.toggle_img = this.isCollapse ? outdent : indent;
+        this.asideWidth = this.isCollapse ? '65px' : '200px';
+        this.imgLeftBorder = this.isCollapse ? '85px' : '220px';
+        this.imgCss = this.isCollapse ? { width: '30px', height: '30px', marginBottom: '24px' } : { width: '80px', height: '80px' };
+        this.imgContainerCss = this.isCollapse ? { marginTop: '8px', width: '30px', height: '30px',  border: '2px solid rgba(68, 87, 107, 0.8)' } :
+          { margin: '8px 0 0 30px', width: '80px', height: '80px', border: '4px solid rgba(68, 87, 107, 0.8)' };
+        this.logoItemHeight = this.isCollapse ? { height: '50px', paddingTop: '4px'} : { height: '100px' };
       },
       overImg () {
         this.toggle_img = this.isCollapse ? outdent_selected : indent_selected;
@@ -181,8 +190,40 @@
       });
     },
     mounted() {
+      let that = this;
       let href = window.location.href;
       this.defaultUrl = href.split("#")[1];
+      this.$router.push("/userManage");
+      this.$http.get('/api/sys/usr/getUserImg', {
+        params: {
+          fromIndexVue: true
+        }
+      }).then(res => {
+        switch (res.data) {
+          case '' :
+            $.ajax({
+              url: '/api/sys/usr/getCurrentUser',
+              dataType: 'json',
+              async: false,
+              success: function (result) {
+                if (result.currentUser != null && result.currentUser != undefined || result.currentUser != '')
+                  that.imgSrc = result.currentUser.employee.sex == 0 ? wmHeader : manHeader;
+                else
+                  that.imgSrc = manHeader;
+              }
+            });
+            break;
+          default :
+            that.imgSrc = 'data:image/png;base64,' + res.data; //如果头像存在，则直接设置头像为获取到的
+        }
+      }).catch(() => {
+        this.$notify({
+          title: '系统提示',
+          type: 'error',
+          message: '获取用户头像失败',
+          duration: 2000
+        });
+      });
     }
   }
 </script>
@@ -222,5 +263,14 @@
   }
   .breadcrumb-inner {
     margin-top: 36px;
+  }
+  .imgContainer {
+    border: 4px solid rgba(68, 87, 107, 0.8);
+    padding: 0;
+    border-radius: 50%;
+  }
+  .imgHeader {
+    opacity: 0.8;
+    border-radius: 50%;
   }
 </style>

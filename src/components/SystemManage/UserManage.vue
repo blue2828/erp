@@ -70,6 +70,7 @@
             type="danger"
             icon="el-icon-delete"
             circle
+            @click="handleDelete(scope.row.id)"
             >删除</el-button>
         </template>
       </el-table-column>
@@ -113,24 +114,24 @@
             let total = res.data.total;
             let userInfo = res.data;
             let tag = ['info', 'success', 'warning', 'danger'];
-            userInfo = userInfo.userInfo.filter((value, index, arr) => {
+            userInfo = userInfo.userInfo.filter((value, index, arr) => { //服务器返回的数据结构不能直接使用，通过filter筛选有用的字段
               value.tag = tag[this.randomData(0, 3)];
               value['empNo'] = value.employee.id;
               value['updaterName'] = value.user.userName;
               value['updateTime'] = this.formatTimeStampToTime(value.updateTime, false);
-              $.ajax({
+              $.ajax({ //获取用户头像
                 url: '/api/sys/usr/getUserImg',
                 async: false,
                 dataType: 'json',
-                data: { userId: value.id },
+                data: { idOrName: value.id },
                 success: function (res) {
                   switch (res) {
-                    case '' :
+                    case '' : //如果头像不存在，即用户没有设置头像
                       switch (value.employee.sex) {
-                        case 0 :
+                        case 0 : //0表示性别是女，默认头像wmHeader.jpg
                           value['imgUrl'] = wmHeader;
                           break;
-                        default :
+                        default : //否则默认头像manHeader.jpg
                           value['imgUrl'] = manHeader;
                       }
                       break;
@@ -171,6 +172,9 @@
         currentChange (val) {
           this.currentPage = val;
           this.fetchTableData();
+        },
+        handleDelete (id) {
+          alert(id);
         }
       },
       created() {
