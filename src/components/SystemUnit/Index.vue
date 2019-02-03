@@ -3,7 +3,7 @@
     <el-header>
     <div class="line"></div>
     <el-menu
-      style="width: 100%;display: flex;position: fixed;top: 0;left: 0;right: 0;"
+      style="width: 100%;display: flex;position: fixed;top: 0;left: 0;right: 0;float: right;"
       :default-active="this.$router.path"
       router
       class="el-menu-demo"
@@ -175,7 +175,6 @@
           let timeout = setTimeout(() => {
             this.$router.push("/");
           }, 2000);
-          clearTimeout(timeout);
         }
       }).catch(() => {
         console.log("请求服务器判断是否已登录失败");
