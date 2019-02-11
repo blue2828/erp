@@ -10,8 +10,18 @@
       background-color="#545c64"
       text-color="#fff"
       active-text-color="#ffd04b">
-      <div style="color: white;font-size: 18px;width: 60%;text-align: left;margin-left: 30px;">进销存后台管理</div>
-      <el-menu-item index="4"><a href="https://www.ele.me" target="_blank">订单管理</a></el-menu-item>
+      <div style="color: white;font-size: 18px;width: 84%;text-align: left;margin-left: 30px;">进销存后台管理</div>
+      <el-menu-item index="4">订单管理</el-menu-item>
+      <el-dropdown trigger="click" style="position: fixed;left: 94vw;top: 10px;" @command="handleCommand">
+      <span class="el-dropdown-link" style="cursor: pointer;color: white;">
+        <img :src="imgSrc" width="30" height="30" style="border-radius: 50%;"><i class="el-icon-arrow-down el-icon--right"></i>
+      </span>
+        <el-dropdown-menu slot="dropdown">
+          <el-dropdown-item command="doEditInfo">编辑资料</el-dropdown-item>
+          <el-dropdown-item command="doUpdatePwd">修改密码</el-dropdown-item>
+          <el-dropdown-item command="doLogout">退出登录</el-dropdown-item>
+        </el-dropdown-menu>
+      </el-dropdown>
     </el-menu>
 
     </el-header>
@@ -128,6 +138,8 @@
     name: 'Index',
     data() {
       return {
+        socketPath: 'ws://localhost:8088/pushMsg',
+        socket: '',
         activeIndex: '1',
         activeIndex2: '1',
         toggle_img: indent,
@@ -164,6 +176,62 @@
       },
       outOfImg () {
         this.toggle_img = this.isCollapse ? outdent : indent;
+      },
+      handleCommand (command) {
+        switch (command) {
+          case 'doLogout' :
+            this.$http.get('/api/sys/usr/logout').then(res => {
+              switch (res.data.success) {
+                case true :
+                  this.$router.push("/");
+                  break;
+                default:
+                  this.$message({
+                    message: '退出登录失败',
+                    showClose: true,
+                    type: 'error',
+                    duration: 2000
+                  });
+              }
+            }).catch(() => {
+              this.$message({
+                message: '退出登录失败',
+                showClose: true,
+                type: 'error',
+                duration: 2000
+              });
+            });
+            break;
+        }
+      },
+      initSocket () {
+        this.socket = new WebSocket(this.socketPath);
+        this.socket.onopen = this.socketOpen;
+        this.socket.onerror = this.socketErr;
+        this.socket.onmessage = this.onSocketMsg;
+      },
+      socketOpen () {
+        console.log("websocket连接成功");
+      },
+      socketClose () {
+        console.log("websocket已经关闭");
+      },
+      onSocketMsg (msg) {
+        msg = JSON.parse(msg.data);
+        if (null != msg && undefined != msg) {
+          if (undefined != msg.errMsg)
+            this.$notify.error({
+              title: '系统提示',
+              message: msg.errMsg,
+              duration: 2000
+            });
+        }
+      },
+      socketErr () {
+        console.log("websocket连接出错");
+      },
+      sendMsg (msg) {
+        this.socket.send(msg);
       }
     },
     watch: {
@@ -190,6 +258,7 @@
       });
     },
     mounted() {
+      this.initSocket();
       let that = this;
       let href = window.location.href;
       this.defaultUrl = href.split("#")[1];

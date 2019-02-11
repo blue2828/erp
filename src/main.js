@@ -11,6 +11,7 @@ import randomData from '@/common/util.js';
 import axios from 'axios'
 import App from './App'
 import $ from 'jquery'
+import store from './store/store.js';
 Vue.prototype.$http = axios;
 Vue.config.productionTip = false
 Vue.use(formatTimeStampToTime);
