@@ -89,7 +89,7 @@
             });
           });
         },
-        handleImg () { //根据输入框请求服务器实现头像跟输入的用户头像对应
+        handleImg: function() { //根据输入框请求服务器实现头像跟输入的用户头像对应
           let that = this;
           switch (this.loginForm.account) {
             case '' : //如果账号/用户名框无输入则return不执行下面请求服务器的代码
@@ -108,15 +108,20 @@
                       data: { idOrName: this.loginForm.account },
                       async: false,
                       success: function (result) {
-                        if (result.resultUser != null && result.resultUser != undefined || result.resultUser != '') //如果存在这个用户
+                        if (result.resultUser != null && result.resultUser != undefined || result.resultUser != '') {//如果存在这个用户
                           that.imgSrc = result.resultUser.employee.sex == 0 ? wmHeader : manHeader; //如果是0 则女，头像为wmHeader，否则manHeader
-                        else
+                          that.$store.dispatch('setAvatarUrl', result.resultUser.employee.sex == 0 ? wmHeader : manHeader)
+                        }
+                        else {
                           that.imgSrc = manHeader;
+                          that.$store.dispatch('setAvatarUrl', manHeader);
+                        }
                       }
                     });
                     break;
                   default :
                     that.imgSrc = 'data:image/png;base64,' + res.data; //如果头像存在，则直接设置头像为获取到的
+                    that.$store.dispatch('setAvatarUrl', 'data:image/png;base64,' + res.data);
                 }
               }).catch(() => {
                 this.$notify({

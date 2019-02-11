@@ -1,5 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import manHeader from '../assets/images/manHeader.jpg';
+import wmHeader from '../assets/images/wmHeader.jpg';
 Vue.use (Vuex);
 let store = new Vuex.Store({
   state: {
@@ -7,7 +9,7 @@ let store = new Vuex.Store({
   },
   actions: {
     setAvatarUrl ({ commit, state }, newAvatar) {
-      commit("setAvatar", newAvatar);
+      commit('setAvatar', newAvatar);
     }
   },
   mutations : {

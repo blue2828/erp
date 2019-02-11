@@ -275,15 +275,20 @@
               dataType: 'json',
               async: false,
               success: function (result) {
-                if (result.currentUser != null && result.currentUser != undefined || result.currentUser != '')
+                if (result.currentUser != null && result.currentUser != undefined || result.currentUser != '') {
                   that.imgSrc = result.currentUser.employee.sex == 0 ? wmHeader : manHeader;
-                else
+                  that.$store.dispatch('setAvatarUrl', result.currentUser.employee.sex == 0 ? wmHeader : manHeader);
+                }
+                else {
                   that.imgSrc = manHeader;
+                  that.$store.dispatch('setAvatarUrl', manHeader);
+                }
               }
             });
             break;
           default :
             that.imgSrc = 'data:image/png;base64,' + res.data; //如果头像存在，则直接设置头像为获取到的
+            that.$store.dispatch('setAvatarUrl', 'data:image/png;base64,' + res.data);
         }
       }).catch(() => {
         this.$notify({

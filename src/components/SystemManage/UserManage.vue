@@ -9,11 +9,13 @@
               class="avatar-uploader"
               action="https://jsonplaceholder.typicode.com/posts/"
               :show-file-list="false"
+              :auto-upload="false"
               :on-success="handleAvatarSuccess"
               :before-upload="beforeAvatarUpload">
-              <img :src="imageUrl" style="width: 120px;height: 120px;border: 4px solid rgba(68, 87, 107, 1);border-radius: 50%;">
+              <img :src="formImageUrl" style="width: 120px;height: 120px;border: 4px solid rgba(68, 87, 107, 1);border-radius: 50%;">
             </el-upload>
-            <el-progress :text-inside="true" :stroke-width="18" :percentage="0" :status="success"></el-progress>
+            <el-progress v-if="showProgress" :text-inside="true" :stroke-width="18" :percentage="0" :status="success"></el-progress>
+            <el-button v-if="showUploadBtn" type="danger" :icon="uploadBtn" circle>{{uploadBtn == 'el-icon-upload' ? '上传' : '重传'}}</el-button>
           </el-col>
           <el-col :span="8"><div style="border: 1px solid white;"></div></el-col>
            </el-row>
@@ -172,7 +174,11 @@
             desc: ''
           },
           formLabelWidth: '120px',
-          dialogTitle: ''
+          dialogTitle: '',
+          showProgress: false,
+          showUploadBtn: false,
+          uploadBtn: 'el-icon-upload',
+          formImageUrl: this.$store.getters.getAvatar
         }
       },
       methods: {
@@ -279,6 +285,12 @@
               });
             });
           });
+        },
+        beforeAvatarUpload (file) {
+          this.formImageUrl = URL.createObjectURL(file.raw);
+        },
+        handleAvatarSuccess (res, file) {
+
         },
         handleAdd () {
           this.dialogFormVisible = true;

@@ -10,6 +10,7 @@ import formatTimeStampToTime from '@/common/util.js';
 import randomData from '@/common/util.js';
 import axios from 'axios'
 import App from './App'
+import Vuex from 'vuex';
 import $ from 'jquery'
 import store from './store/store.js';
 Vue.prototype.$http = axios;
@@ -17,8 +18,10 @@ Vue.config.productionTip = false
 Vue.use(formatTimeStampToTime);
 Vue.use(randomData);
 Vue.use(ElementUI);
+Vue.use(Vuex);
 new Vue({
   el: '#app',
+  store,
   router,
   components: { App },
   template: '<App/>'
