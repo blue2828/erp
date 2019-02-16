@@ -65,7 +65,8 @@
               params: {
                 userNameOrId: this.loginForm.account,
                 password: this.loginForm.password,
-                rememberMe: this.rememberMe
+                rememberMe: this.rememberMe,
+                fromLoginVue: true
               }
             }).then((res) => {
               let msg = res.data.msg;

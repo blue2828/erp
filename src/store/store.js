@@ -5,21 +5,31 @@ import wmHeader from '../assets/images/wmHeader.jpg';
 Vue.use (Vuex);
 let store = new Vuex.Store({
   state: {
-    avatar: ''
+    avatar: '',
+    currentUser: ''
   },
   actions: {
     setAvatarUrl ({ commit, state }, newAvatar) {
       commit('setAvatar', newAvatar);
+    },
+    setCurrentUser ({ commit, state }, newUser) {
+      commit('setCurrentUser', newUser)
     }
   },
   mutations : {
     setAvatar (state, newAvatar) {
       state.avatar = newAvatar;
+    },
+    setCurrentUser (state, newUser) {
+      state.currentUser = newUser;
     }
   },
   getters: {
     getAvatar (state) {
       return state.avatar;
+    },
+    getCurrentUser (state) {
+      return state.currentUser;
     }
   }
 

@@ -1,60 +1,96 @@
 <template>
   <div>
     <el-dialog :modal-append-to-body="false" :title="dialogTitle" :visible.sync="dialogFormVisible">
-      <el-form :model="form">
+      <el-form :model="form" :hide-required-asterisk="true" ref="userForm" :status-icon="true">
         <el-row>
-          <el-col :span="8"><div style="border: 1px solid white;"></div></el-col>
-          <el-col :span="8">
+          <el-col :span="4"><div style="border: 1px solid white;"></div></el-col>
+          <el-col :span="16">
             <el-upload
+              ref="uploadField"
               class="avatar-uploader"
-              action="https://jsonplaceholder.typicode.com/posts/"
+              action="/api/sys/usr/uploadUserImg"
               :show-file-list="false"
-              :auto-upload="false"
+              :limit="1"
+              :data="currentEditUser"
+              :drag="true"
               :on-success="handleAvatarSuccess"
               :before-upload="beforeAvatarUpload">
               <img :src="formImageUrl" style="width: 120px;height: 120px;border: 4px solid rgba(68, 87, 107, 1);border-radius: 50%;">
             </el-upload>
-            <el-progress v-if="showProgress" :text-inside="true" :stroke-width="18" :percentage="0" :status="success"></el-progress>
-            <el-button v-if="showUploadBtn" type="danger" :icon="uploadBtn" circle>{{uploadBtn == 'el-icon-upload' ? '上传' : '重传'}}</el-button>
+            <el-progress v-if="showProgress" :stroke-width="10" :percentage="uploadPercentage" :status="uploadStatus"></el-progress>
           </el-col>
-          <el-col :span="8"><div style="border: 1px solid white;"></div></el-col>
+          <el-col :span="4"><div style="border: 1px solid white;"></div></el-col>
            </el-row>
         <el-row>
           <el-col :span="10">
-            <el-form-item label="用户账号" :label-width="formLabelWidth">
-              <el-input v-model="form.id" autocomplete="off"></el-input>
+            <el-form-item label="用户账号" :label-width="formLabelWidth" v-if="showExtraFormItem"
+                prop="userOrder"
+                          :rules="[{ required: true, message: '账号不能为空' }]"
+            >
+              <el-input :clearable="true" v-model="form.userOrder" autocomplete="off"></el-input>
             </el-form-item>
           </el-col>
-          <el-col :span="2"><div style="border: 1px solid white;"></div></el-col>
+          <el-col :span="2"  v-if="showExtraFormItem"><div style="border: 1px solid white;"></div></el-col>
           <el-col :span="10">
-            <el-form-item label="用户名" :label-width="formLabelWidth">
-              <el-select v-model="form.userName" placeholder="请选择活动区域">
-                <el-option label="区域一" value="shanghai"></el-option>
-                <el-option label="区域二" value="beijing"></el-option>
-              </el-select>
+            <el-form-item label="用户名" :label-width="formLabelWidth" prop="userName"
+               :rules="[{ required: true, message: '用户名不能为空' }]"
+            >
+              <el-input :clearable="true" v-model="form.userName" autocomplete="off"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="2"  v-if="!showExtraFormItem"><div style="border: 1px solid white;"></div></el-col>
+          <el-col :span="10" v-if="!showExtraFormItem">
+            <el-form-item label="关联员工" :label-width="formLabelWidth" prop="code">
+              <el-input @mousedown.native="propTransfer" v-model="form.code" autocomplete="off"></el-input>
             </el-form-item>
           </el-col>
         </el-row>
+        <el-row v-if="!showExtraFormItem">
+          <el-col :span="10">
+            <el-form-item label="用户角色" :label-width="formLabelWidth" prop="role">
+              <el-input @mousedown.native="propTransfer" v-model="form.code" autocomplete="off"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="2"  v-if="!showExtraFormItem"><div style="border: 1px solid white;"></div></el-col>
+          <el-col :span="10"  v-if="!showExtraFormItem"><div style="border: 1px solid white;"></div></el-col>
+        </el-row>
         <el-row>
           <el-col :span="10">
-            <el-form-item label="员工编号" :label-width="formLabelWidth">
-              <el-input v-model="form.code" autocomplete="off"></el-input>
+            <el-form-item label="员工编号" prop="code" :label-width="formLabelWidth" v-if="showExtraFormItem">
+              <el-input v-model="form.code" autocomplete="off" @mousedown.native="propTransfer"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="2"><div style="border: 1px solid white;"></div></el-col>
           <el-col :span="10">
-            <el-form-item label="活动区域" :label-width="formLabelWidth">
-              <el-select v-model="form.region" placeholder="请选择活动区域">
-                <el-option label="区域一" value="shanghai"></el-option>
-                <el-option label="区域二" value="beijing"></el-option>
-              </el-select>
+            <el-form-item v-if="showExtraFormItem" label="用户角色" :label-width="formLabelWidth" prop="role">
+              <el-input @mousedown.native="propTransfer" v-model="form.code" autocomplete="off"></el-input>
             </el-form-item>
           </el-col>
         </el-row>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+        <el-button type="danger" @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="handleSubmit" :loading="showBtnLoading">确 定</el-button>
+      </div>
+    </el-dialog>
+    <el-dialog :modal-append-to-body="false" title="关联员工" :visible.sync="referEmployeeDV">
+      <el-row>
+        <el-col :span="3"><div style="border: 1px solid white;"></div></el-col>
+        <el-col :span="20">
+          <el-transfer
+            @change="onChangeTransfer"
+            :titles="['员工', '已关联']"
+            filterable
+            filter-placeholder="请输入关键词搜索"
+            v-model="selectedEp"
+            style="text-align: left;"
+            :data="EpdataSource">
+          </el-transfer>
+        </el-col>
+        <el-col :span="1"><div style="border: 1px solid white;"></div></el-col>
+      </el-row>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="danger" @click="closeEpRefer">关 闭</el-button>
       </div>
     </el-dialog>
     <el-row>
@@ -125,6 +161,7 @@
             circle
             type="primary"
             icon="el-icon-edit"
+            @click="handleEdit(scope.row)"
             >编辑</el-button>
           <el-button
             size="mini"
@@ -163,25 +200,65 @@
           pageSize: 10, //每页显示条目个数
           manHeader: manHeader,
           dialogFormVisible: false,
+          referEmployeeDV: false,
           form: {
-            name: '',
-            region: '',
-            date1: '',
-            date2: '',
-            delivery: false,
-            type: [],
-            resource: '',
-            desc: ''
+            id: '',
+            userName: '',
+            code: '',
+            userOrder: '',
+            empId: ''
           },
           formLabelWidth: '120px',
           dialogTitle: '',
+          uploadPercentage: 0,
           showProgress: false,
+          uploadStatus: 'text',
           showUploadBtn: false,
           uploadBtn: 'el-icon-upload',
-          formImageUrl: this.$store.getters.getAvatar
+          formImageUrl: '',
+          currentEditUser: {
+            id: '',
+            index: ''
+          },
+          showExtraFormItem: '',
+          showBtnLoading: false,
+          showREDVLoading: false,
+          selectedEp: [],
+          EpdataSource: this.getEpDataSource(),
+          transferFromAdd: false
         }
       },
       methods: {
+        getEpDataSource () {
+          let data;
+          let that = this;
+          $.ajax({
+            url: '/api/baseConfig/employee/queryAllEmployee',
+            data: { currentPage: 1 },
+            dataType: 'json',
+            async: false,
+            success: function (res) {
+              let EpdataSource = [];
+              let remoteData = [];
+              remoteData = res.employeeInfo;
+              remoteData.forEach((info, index) => {
+                EpdataSource.push({
+                  label: info.code + ' ' + info.empName,
+                  key: info.code
+                });
+              });
+              data = EpdataSource;
+            },
+            error: function () {
+              that.$message.error({
+                showClose: true,
+                message: '获取员工数据失败',
+                duration: 2000
+              });
+            }
+          });
+          return data;
+        },
         fetchTableData () {
           let _this = this;
           this.$http.get('/api/sys/usr/getAllUser',
@@ -198,6 +275,7 @@
               value['updaterName'] = value.user.userName;
               value['updateTime'] = this.formatTimeStampToTime(value.updateTime, false);
               value['index'] = index;
+              value['empId'] = value.employee.id;
               $.ajax({ //获取用户头像
                 url: '/api/sys/usr/getUserImg',
                 async: false,
@@ -226,7 +304,6 @@
                   });
                 }
               });
-
               return arr ;
             });
             _this.tableData = userInfo;
@@ -270,6 +347,7 @@
                     message: '删除成功'
                   });
                   this.tableData.splice(index, 1);
+                  this.total = this.total - 1;
                   break;
                 default :
                   this.$message.error({
@@ -286,15 +364,203 @@
             });
           });
         },
+        handleEdit (info) {
+          this.transferFromAdd = false;
+          this.form = {
+            id: info.id,
+            userName: info.userName,
+            code: info.empNo,
+            userOrder: info.userOrder,
+            empId: info.empId
+          };
+          this.showExtraFormItem = true;
+          this.formImageUrl = info.imgUrl;
+          this.dialogFormVisible = true;
+          this.dialogTitle = '编辑用户';
+          this.currentEditUser.id = info.id;
+          this.currentEditUser.index = info.index;
+        },
         beforeAvatarUpload (file) {
-          this.formImageUrl = URL.createObjectURL(file.raw);
+          let that = this;
+          let isImage = this.isImg(file.type);
+          if (!isImage) {
+            this.$message.error({
+              showClose: true,
+              message: '不支持的图片格式',
+              duration: 2000
+            });
+            return false;
+          }
+          let fileReader = new FileReader();
+          fileReader.readAsDataURL(file);
+          fileReader.onload = function (e) {
+            that.formImageUrl = this.result;
+          };
+          this.showProgress = true;
         },
         handleAvatarSuccess (res, file) {
-
+          let that = this;
+          switch (res.success) {
+            case true :
+              this.uploadStatus = 'success';
+              this.uploadPercentage = 100;
+              if (this.currentEditUser.id == this.$store.getters.getCurrentUser.id)
+                this.$store.dispatch('setAvatarUrl', that.formImageUrl);
+              this.$refs['uploadField'].clearFiles();
+              let timer = setTimeout(() => {
+                this.showProgress = false;
+                clearTimeout(timer);
+              }, 2000);
+              this.tableData = this.tableData.filter((value, index, arr) => {
+                if (index == this.currentEditUser.index)
+                  value.imgUrl = that.formImageUrl;
+                return arr;
+              });
+              break;
+            default :
+              this.$message.error({
+                showClose: true,
+                message: res.errMsg,
+                duration: 2000
+              });
+          }
         },
         handleAdd () {
+          this.transferFromAdd = true;
+          this.form = {
+            id: '',
+            userName: '',
+            code: '',
+            userOrder: '',
+            empId: ''
+          }
+          this.showExtraFormItem = false;
+          this.formImageUrl = manHeader;
           this.dialogFormVisible = true;
           this.dialogTitle = '新增用户';
+        },
+        handleSubmit () {
+          this.$refs['userForm'].validate(valid => {
+            switch (valid) {
+              case true:
+                if (!this.isNumed(this.form.userOrder)) {
+                  this.$message.error({
+                    showClose: true,
+                    messsage: '用户账号为数值',
+                    duration: 2000
+                  });
+                  return false;
+                }
+                this.$http.get('/api/sys/usr/saveUserInfo', {
+                  params: {
+                    id: this.form.id,
+                    userOrder: this.form.userOrder,
+                    userName: this.form.userName,
+                    employeeId: this.form.empId,
+                    updaterId: this.$store.getters.getCurrentUser.id
+                  }
+                }).then(res => {
+                  switch (res.data.success) {
+                    case true :
+                      this.$message.success({
+                        showClose: true,
+                        message: '保存成功',
+                        duration: 2000
+                      });
+                      this.dialogFormVisible = false;
+                      this.fetchTableData();
+                      break;
+                    default :
+                      this.$message.error({
+                        showClose: true,
+                        message: res.data.errMsg,
+                        duration: 2000
+                      });
+                  }
+                }).catch(() => {
+                  this.$message.error({
+                    showClose: true,
+                    message: '连接服务器失败',
+                    duration: 2000
+                  });
+                });
+                break;
+              default:
+                alert('false');
+                return false;
+            }
+          });
+        },
+        closeEpRefer () {
+          this.referEmployeeDV = false;
+          this.selectedEp = [];
+        },
+        propTransfer () {
+          this.referEmployeeDV = true; //打开穿梭框
+          switch (this.selectedEp.length) { //如果选中的员工的数组长度
+            case 0 : //长度如果是0
+              if (this.form.code != undefined && this.form.code != null && this.form.code != '') {
+                if (!this.transferFromAdd) {
+                  this.selectedEp.push(this.form.code);
+                  this.EpdataSource = this.EpdataSource.filter((value, index, arr) => {
+                    if (value.key != this.selectedEp[0] && this.form.code != '')
+                      value.disabled = true; //disabled设置成true就是禁止勾选
+                    return arr;
+                  });
+                }
+              }
+              break;
+            default :
+              if (this.transferFromAdd) { //如果点击的事添加的按钮，如果当前已经选中有员工，就把选中员工的数组清空
+                this.selectedEp = [];
+                this.EpdataSource = this.EpdataSource.filter((value, index, arr) => { //筛选，把disabled全部去掉，即全部可选
+                  value.disabled = false;
+                  return arr;
+                });
+                return;
+              }
+              this.selectedEp = this.selectedEp.filter((value, index, arr) => {
+                return value == this.form.code;
+              });
+              this.EpdataSource = this.EpdataSource.filter((value, index, arr) => {
+                if (this.selectedEp.length != 1)
+                  value.disabled = true;
+                return arr;
+              });
+          }
+        },
+        onChangeTransfer (moveArr, direction) {
+          switch (direction) {
+            case 'left' :
+              switch (this.selectedEp.length) {
+                case 0 :
+                  this.EpdataSource = this.EpdataSource.filter((value, index, arr) => {
+                      value.disabled = false;
+                    return arr;
+                  });
+                  this.form.code = '';
+                  this.form.empId = '';
+                  break;
+              }
+              break;
+            default :
+              switch (this.selectedEp.length) {
+                case 1 :
+                  this.EpdataSource = this.EpdataSource.filter((value, index, arr) => {
+                    if (value.key != this.selectedEp[0])
+                      value.disabled = true;
+                    return arr;
+                  });
+                  this.form.code = moveArr[0];
+                  this.tableData.forEach((value, index, arr) => {
+                    if (value.empNo == moveArr[0]) {
+                      this.form.empId = value.empId;
+                      return false;
+                    }
+                  });
+                  break;
+              }
+          }
         }
       },
       created() {

@@ -14,9 +14,10 @@
       <el-menu-item index="4">订单管理</el-menu-item>
       <el-dropdown trigger="click" style="position: fixed;left: 94vw;top: 10px;" @command="handleCommand">
       <span class="el-dropdown-link" style="cursor: pointer;color: white;">
-        <img :src="imgSrc" width="30" height="30" style="border-radius: 50%;"><i class="el-icon-arrow-down el-icon--right"></i>
+        <img :src="getImgHeader" width="30" height="30" ref="littleImgHeader" style="border-radius: 50%;"><i class="el-icon-arrow-down el-icon--right"></i>
       </span>
         <el-dropdown-menu slot="dropdown">
+          <el-dropdown-item disabled>用户：{{currentUser.userName}}</el-dropdown-item>
           <el-dropdown-item command="doEditInfo">编辑资料</el-dropdown-item>
           <el-dropdown-item command="doUpdatePwd">修改密码</el-dropdown-item>
           <el-dropdown-item command="doLogout">退出登录</el-dropdown-item>
@@ -30,7 +31,7 @@
         <el-menu router :default-active="defaultUrl" :collapse="isCollapse">
           <el-menu-item index="logo" :style="logoItemHeight" style="padding-top: 0;">
             <div class="imgContainer" :style="imgContainerCss">
-              <img :src="imgSrc" class="imgHeader" :style="imgCss">
+              <img :src="getImgHeader" class="imgHeader" ref="bigImgHeader"  :style="imgCss">
             </div>
           </el-menu-item>
           <el-submenu index="0">
@@ -157,7 +158,8 @@
           width: '80px',
           height: '80px'
         },
-        logoItemHeight: { height: '100px' }
+        logoItemHeight: { height: '100px' },
+        currentUser: {}
       };
     },
     methods: {
@@ -219,12 +221,15 @@
       onSocketMsg (msg) {
         msg = JSON.parse(msg.data);
         if (null != msg && undefined != msg) {
-          if (undefined != msg.errMsg)
+          if (undefined != msg.errMsg) {
             this.$notify.error({
               title: '系统提示',
               message: msg.errMsg,
               duration: 2000
             });
+            if (msg.errMsg.indexOf("登录") > -1)
+              this.$router.push("/");
+          }
         }
       },
       socketErr () {
@@ -240,6 +245,14 @@
       }
     },
     created() {
+      this.$http.get('/api/sys/usr/getCurrentUser').then(res => {
+        let info = res.data.currentUser;
+        if (info != null && info != undefined)
+          this.currentUser = info;
+        this.$store.dispatch('setCurrentUser', info);
+      }).catch(() => {
+        console.log("获取当前用户信息失败");
+      });
       this.$http.get('/api/sys/usr/isLogined').then((res) => {
         let isLogined = res.data.isLogined;
         if (!isLogined) {
@@ -257,47 +270,21 @@
         console.log("请求服务器判断是否已登录失败");
       });
     },
+    computed: {
+      getImgHeader: function () {
+        return this.$store.getters.getAvatar;
+      }
+    },
     mounted() {
       this.initSocket();
       let that = this;
       let href = window.location.href;
       this.defaultUrl = href.split("#")[1];
       this.$router.push("/userManage");
-      this.$http.get('/api/sys/usr/getUserImg', {
-        params: {
-          fromIndexVue: true
-        }
-      }).then(res => {
-        switch (res.data) {
-          case '' :
-            $.ajax({
-              url: '/api/sys/usr/getCurrentUser',
-              dataType: 'json',
-              async: false,
-              success: function (result) {
-                if (result.currentUser != null && result.currentUser != undefined || result.currentUser != '') {
-                  that.imgSrc = result.currentUser.employee.sex == 0 ? wmHeader : manHeader;
-                  that.$store.dispatch('setAvatarUrl', result.currentUser.employee.sex == 0 ? wmHeader : manHeader);
-                }
-                else {
-                  that.imgSrc = manHeader;
-                  that.$store.dispatch('setAvatarUrl', manHeader);
-                }
-              }
-            });
-            break;
-          default :
-            that.imgSrc = 'data:image/png;base64,' + res.data; //如果头像存在，则直接设置头像为获取到的
-            that.$store.dispatch('setAvatarUrl', 'data:image/png;base64,' + res.data);
-        }
-      }).catch(() => {
-        this.$notify({
-          title: '系统提示',
-          type: 'error',
-          message: '获取用户头像失败',
-          duration: 2000
-        });
-      });
+      /**
+       * 刷新除了登录组件之外的路由会导致store里面的avatar销毁，所以不存在再次获取头像，并set到store里面
+       */
+      this.getUserImgAndSetToStore();
     }
   }
 </script>
