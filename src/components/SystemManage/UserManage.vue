@@ -106,7 +106,13 @@
       <el-col :span="2"><el-button type="success" icon="el-icon-plus" @click="handleAdd">新增</el-button></el-col>
       <el-col :span="3"><el-button type="danger" icon="el-icon-delete" @click="handleDelete(checkboxSelectData, -1, true)">批量删除</el-button></el-col>
       <el-col :span="2"><el-button type="info" icon="el-icon-printer" @click="handleExport">导出</el-button></el-col>
-      <el-col :span="17"></el-col>
+      <el-col :span="6">
+        <el-input :clearable="true" v-model="searchAccount" autocomplete="off" placeholder="根据用户名或者用户账号搜索"></el-input>
+      </el-col>
+      <el-col :span="2">
+        <el-button type="primary" icon="el-icon-search" @click="fetchTableData">搜索</el-button>
+      </el-col>
+      <el-col :span="9"></el-col>
     </el-row>
     <el-table
       @selection-change="onTableChange"
@@ -240,7 +246,8 @@
           roleOptions: '',
           isSelectedImgFile: false, //是否已经选中头像图片
           isEdit: false,
-          checkboxSelectData: []
+          checkboxSelectData: [],
+          searchAccount: ''
         }
       },
       methods: {
@@ -269,7 +276,7 @@
           let _this = this;
           this.$http.get('/api/sys/usr/getAllUser',
             {
-              params: { currentPage: this.currentPage, pageSize: this.pageSize }
+              params: { currentPage: this.currentPage, pageSize: this.pageSize, searchAccount: this.searchAccount }
             }
           ).then(res => { //http://localhost:8088/ == /api
             let total = res.data.total;
