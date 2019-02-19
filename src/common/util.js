@@ -14,7 +14,7 @@ export default {
       return result;
     };
     Vue.prototype.randomData = function (maxData, minData) {
-      return Math.floor(Math.random() * (maxData - minData + 1) + minData)
+      return Math.round(Math.random() * (maxData - minData + 1) + minData)
     };
     Vue.prototype.isImg = function (type) {
       let requiredType = ['jpeg', 'jpg', 'png', 'gif', 'bmp'];

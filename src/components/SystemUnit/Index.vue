@@ -29,7 +29,7 @@
     <el-container>
       <el-aside :width="asideWidth">
         <el-menu router :default-active="defaultUrl" :collapse="isCollapse">
-          <el-menu-item index="logo" :style="logoItemHeight" style="padding-top: 0;">
+          <el-menu-item index="" :style="logoItemHeight" style="padding-top: 0;">
             <div class="imgContainer" :style="imgContainerCss">
               <img :src="getImgHeader" class="imgHeader" ref="bigImgHeader"  :style="imgCss">
             </div>
