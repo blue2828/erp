@@ -635,19 +635,15 @@
       mounted() {
         this.$http.get('/api/sys/role/queryAllRoles').then(res => {
           let roleIdsSet = new Set();
-          let rolesMap = new Map();
           let roles = [];
           res.data.roleList.forEach((value, index, arr) => {
-            switch (index) {
-              case 0 :
-                roles.push(value);
-                break;
-              default :
-                roles.forEach((val, key, array) => {
-                  if (val.id != value.id)
-                    roles.push(value);
-                });
-            }
+            roleIdsSet.add(value.id);
+          });
+          roleIdsSet.forEach((value, index, arr) => {
+            let temp = res.data.roleList.filter((val, key, array) => {
+              return val.id == value;
+            });
+            roles.push(temp[0]);
           });
           this.roleOptions = roles;
         }).catch(() => {

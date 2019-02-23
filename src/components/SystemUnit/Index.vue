@@ -42,7 +42,6 @@
             <el-menu-item-group>
               <el-menu-item index="1-1">供应商管理</el-menu-item>
               <el-menu-item index="1-2">采购订单</el-menu-item>
-              <el-menu-item index="1-3">采购退货</el-menu-item>
             </el-menu-item-group>
           </el-submenu>
           <el-submenu index="1">
@@ -53,7 +52,6 @@
                   <el-menu-item-group>
                     <el-menu-item index="1-1">客户管理</el-menu-item>
                     <el-menu-item index="1-2">销售订单</el-menu-item>
-                    <el-menu-item index="1-3">销售退货</el-menu-item>
                   </el-menu-item-group>
               </el-submenu>
               <el-submenu index="2" >
@@ -62,12 +60,9 @@
                      <span>库存管理</span>
                    </template>
                    <el-menu-item-group>
-                      <el-menu-item index="2-1">采购审核</el-menu-item>
-                      <el-menu-item index="2-2">销售审核</el-menu-item>
-                   <el-submenu index="2-3">
-                      <template slot="title">库存查看</template>
-                      <el-menu-item index="2-3-1">库存调拨</el-menu-item>
-                   </el-submenu>
+                      <el-menu-item index="2-1">库存查看</el-menu-item>
+                      <el-menu-item index="2-2">销售审批</el-menu-item>
+                      <el-menu-item index="2-3">采购审批</el-menu-item>
                    </el-menu-item-group>
               </el-submenu>
               <el-submenu index="3">
@@ -98,7 +93,7 @@
                     </template>
                     <el-menu-item-group>
                        <el-menu-item index="5-1">菜单管理</el-menu-item>
-                       <el-menu-item index="5-2">角色管理</el-menu-item>
+                       <el-menu-item index="/role_Permission">角色管理</el-menu-item>
                        <el-menu-item index="/userManage">用户管理</el-menu-item>
                     </el-menu-item-group>
               </el-submenu>
@@ -280,7 +275,12 @@
       let that = this;
       let href = window.location.href;
       this.defaultUrl = href.split("#")[1];
-      this.$router.push("/userManage");
+      let thisUrl = href.split("#")[1];
+      switch (thisUrl.indexOf("index") > -1) {
+        case true :
+          that.$router.push("/userManage");
+          break;
+      }
       /**
        * 刷新除了登录组件之外的路由会导致store里面的avatar销毁，所以不存在再次获取头像，并set到store里面
        */
