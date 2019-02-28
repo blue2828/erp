@@ -6,11 +6,13 @@ export default {
       switch (isDate) {
         case false :
           result = d.getFullYear() + '-' + ((d.getMonth() + 1).toString().length > 1 ? d.getMonth() + 1 : '0' + (d.getMonth() + 1)) + '-' +
-            (d.getDate().toString().length > 1 ? d.getDate() : '0' + d.getDate());
+            (d.getDate().toString().length > 1 ? d.getDate() : '0' + d.getDate()) + " " + (d.getHours().toString().length > 1 ? d.getHours() : '0' + d.getHours()) + ":" +
+            (d.getMinutes().toString().length > 1 ? d.getMinutes() : '0' + d.getMinutes()) + ":" + (d.getSeconds().toString().length > 1 ? d.getSeconds() : '0' + d.getSeconds());
           break;
+        default :
+          result = d.getFullYear() + '-' + ((d.getMonth() + 1).toString().length > 1 ? d.getMonth() + 1 : '0' + (d.getMonth() + 1)) + '-' +
+          (d.getDate().toString().length > 1 ? d.getDate() : '0' + d.getDate());
       }
-      result = result + " " + (d.getHours().toString().length > 1 ? d.getHours() : '0' + d.getHours()) + ":" +
-        (d.getMinutes().toString().length > 1 ? d.getMinutes() : '0' + d.getMinutes()) + ":" + (d.getSeconds().toString().length > 1 ? d.getSeconds() : '0' + d.getSeconds());
       return result;
     };
     Vue.prototype.randomData = function (maxData, minData) {

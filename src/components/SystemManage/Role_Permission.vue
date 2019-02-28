@@ -77,6 +77,10 @@
                 });
                 roles.push(temp[0]);
               });
+              roles = roles.filter((value, index, arr) => {
+                value.index = index;
+                return arr;
+              });
               this.tableData = roles;
               resolve(this.tableData);
             }).catch(() => {
@@ -107,7 +111,9 @@
               case true :
                 this.editRoleName = false;
                 this.currentEditRoleId = -1;
-                this.fetchRoleTbData();
+                this.fetchRoleTbData().then(res => {
+                  this.$refs.roleTable.setCurrentRow(this.tableData[arg.index]);
+                });
                 this.$message.success({
                   showClose: true,
                   message: '保存成功',

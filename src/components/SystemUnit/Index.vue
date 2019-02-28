@@ -40,8 +40,8 @@
               <span>采购管理</span>
             </template>
             <el-menu-item-group>
-              <el-menu-item index="1-1">供应商管理</el-menu-item>
-              <el-menu-item index="1-2">采购订单</el-menu-item>
+              <el-menu-item index="/supplierManage">供应商管理</el-menu-item>
+              <el-menu-item index="/buyOrder">采购订单</el-menu-item>
             </el-menu-item-group>
           </el-submenu>
           <el-submenu index="1">
@@ -50,8 +50,8 @@
                     <span>销售管理</span>
                   </template>
                   <el-menu-item-group>
-                    <el-menu-item index="1-1">客户管理</el-menu-item>
-                    <el-menu-item index="1-2">销售订单</el-menu-item>
+                    <el-menu-item index="/customerManage">客户管理</el-menu-item>
+                    <el-menu-item index="saleOrder">销售订单</el-menu-item>
                   </el-menu-item-group>
               </el-submenu>
               <el-submenu index="2" >
@@ -81,9 +81,9 @@
                       <span>基础设置</span>
                     </template>
                     <el-menu-item-group>
-                       <el-menu-item index="4-1">商品管理</el-menu-item>
-                       <el-menu-item index="4-2">仓库管理</el-menu-item>
-                       <el-menu-item index="4-3">员工管理</el-menu-item>
+                       <el-menu-item index="/goodsManage">商品管理</el-menu-item>
+                       <el-menu-item index="/repoManage">仓库管理</el-menu-item>
+                       <el-menu-item index="/employeeManage">员工管理</el-menu-item>
                        </el-menu-item-group>
               </el-submenu>
               <el-submenu index="5">
