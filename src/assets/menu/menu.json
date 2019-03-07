@@ -1,0 +1,242 @@
+{
+  "list": [{
+    "baseConfig": [{
+      "name": "商品管理",
+      "sub": [{
+        "name": "浏览商品",
+        "permission": "goods:select"
+      }, {
+        "name": "添加商品",
+        "permission": "goods:add"
+      }, {
+        "name": "删除商品",
+        "permission": "goods:delete"
+      }, {
+        "name": "修改商品",
+        "permission": "goods:edit"
+      }, {
+        "name": "导出商品",
+        "permission": "goods:export"
+      }]
+    },
+      {
+        "name": "仓库管理",
+        "sub": [{
+          "name": "浏览仓库",
+          "permission": "repository:select"
+        }, {
+          "name": "添加仓库",
+          "permission": "repository:add"
+        }, {
+          "name": "删除仓库",
+          "permission": "repository:delete"
+        }, {
+          "name": "修改仓库",
+          "permission": "repository:edit"
+        }]
+      },
+      {
+        "name": "员工管理",
+        "sub": [{
+          "name": "浏览员工",
+          "permission": "employee:select"
+        }, {
+          "name": "添加员工",
+          "permission": "employee:add"
+        }, {
+          "name": "删除员工",
+          "permission": "employee:delete"
+        }, {
+          "name": "修改员工",
+          "permission": "employee:edit"
+        }, {
+          "name": "导出员工信息",
+          "permission": "employee:export"
+        }]
+      }
+    ]
+  },
+    {
+      "purchase": [{
+        "name": "供应商管理",
+        "sub": [{
+          "name": "允许浏览供应商信息",
+          "permission": "supplier:select"
+        }, {
+          "name": "允许添加供应商",
+          "permission": "supplier:add"
+        }, {
+          "name": "允许删除供应商",
+          "permission": "supplier:delete"
+        }, {
+          "name": "允许修改供应商",
+          "permission": "supplier:edit"
+        }, {
+          "name": "导出供应商信息",
+          "permission": "supplier:export"
+        }]
+      },
+        {
+          "name": "采购订单",
+          "sub": [{
+            "name": "浏览订单",
+            "permission": "purchaseOrder:select"
+          }, {
+            "name": "采购",
+            "permission": "purchaseOrder:add"
+          }, {
+            "name": "采购退货",
+            "permission": "purchaseOrder:cancel"
+          }, {
+            "name": "导出采购订单",
+            "permission": "purchaseOrder:export"
+          }]
+        }
+      ]
+    },
+    {
+      "sale": [{
+        "name": "客户管理",
+        "sub": [{
+          "name": "允许显示客户信息",
+          "permission": "customer:select"
+        }, {
+          "name": "允许添加客户",
+          "permission": "customer:add"
+        }, {
+          "name": "允许删除客户",
+          "permission": "customer:delete"
+        }, {
+          "name": "允许修改客户",
+          "permission": "customer:edit"
+        }, {
+          "name": "导出客户信息",
+          "permission": "customer:export"
+        }]
+      },
+        {
+          "name": "销售订单",
+          "sub": [{
+            "name": "允许浏览该功能",
+            "permission": "saleOrder:select"
+          }, {
+            "name": "售出",
+            "permission": "saleOrder:add"
+          }, {
+            "name": "销售退货",
+            "permission": "saleOrder:cancel"
+          }, {
+            "name": "导出销售订单",
+            "permission": "saleOrder:export"
+          }]
+        }
+      ]
+    },
+    {
+      "stock": [{
+        "name": "库存查看",
+        "sub": [{
+          "name": "允许查看库存信息",
+          "permission": "stock:select"
+        }, {
+          "name": "允许导出库存信息",
+          "permission": "stock:export"
+        }]
+      },
+        {
+          "name": "采购审批",
+          "sub": [{
+            "name": "允许浏览采购审批列表",
+            "permission": "purchaseOrderWithApprove:select"
+          }, {
+            "name": "允许浏览审批采购列表",
+            "permission": "purchaseOrderWithApprove:approve"
+          }, {
+            "name": "允许导出审批采购列表",
+            "permission": "purchaseOrderWithApprove:export"
+          }
+
+          ]
+        }, {
+          "name": "销售审批",
+          "sub": [{
+            "name": "允许浏览销售审批列表",
+            "permission": "saleOrderWithApprove:select"
+          }, {
+            "name": "允许浏览审批销售列表",
+            "permission": "saleOrderWithApprove:approve"
+          }, {
+            "name": "允许导出审批销售列表",
+            "permission": "saleOrderWithApprove:export"
+          }
+
+          ]
+        }
+      ]
+    },
+    {
+      "addUp": [{
+        "name": "采购统计",
+        "sub": [{
+          "name": "允许显示采购统计",
+          "permission": "purchaseAddUp:select"
+        }]
+      },
+        {
+          "name": "销售统计",
+          "sub": [{
+            "name": "允许显示销售统计",
+            "permission": "saleAddUp:select"
+          }]
+        }, {
+          "name": "支出分析",
+          "sub": [{
+            "name": "允许显示支出分析",
+            "permission": "pay:select"
+          }]
+        }, {
+          "name": "收入分析",
+          "sub": [{
+            "name": "允许显示收入分析",
+            "permission": "income:select"
+          }]
+        }
+      ]
+    },
+    {
+      "systemUnit": [{
+        "name": "角色管理",
+        "sub": [{
+          "name": "允许显示角色信息",
+          "permission": "role:select"
+        }, {
+          "name": "允许配置角色",
+          "permission": "role_permission:saveConfig"
+        }, {
+          "name": "允许修改角色名",
+          "permission": "role:edit"
+        }]
+      },
+        {
+          "name": "用户管理",
+          "sub": [{
+            "name": "允许显示用户信息",
+            "permission": "user:select"
+          }, {
+            "name": "允许修改用户",
+            "permission": "user:edit"
+          }, {
+            "name": "允许增加用户",
+            "permission": "user:add"
+          }, {
+            "name": "允许删除用户",
+            "permission": "user:delete"
+          }, {
+            "name": "允许导出用户信息",
+            "permission": "user:export"
+          }]
+        }
+      ]
+    }
+  ]
+}

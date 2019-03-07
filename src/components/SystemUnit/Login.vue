@@ -1,12 +1,12 @@
 <template>
   <div id="container" >
     <div class="imgContainer">
-      <img src="../../assets/images/manHeader.jpg" class="imgHeader">
+      <img :src="imgSrc" class="imgHeader">
     </div>
     <div class="loginField">
       <el-form :model="loginForm" ref="loginForm" :status-icon="statusIcon" :size="formItemSize">
         <el-form-item>
-          <el-input style="margin-top: 40px;" class="inputSize" placeholder="账号/姓名"  prefix-icon="el-icon-erp-ai-user" v-model="loginForm.account"/>
+          <el-input @blur="handleImg" style="margin-top: 40px;" class="inputSize" placeholder="账号/姓名"  prefix-icon="el-icon-erp-ai-user" v-model="loginForm.account"/>
         </el-form-item>
         <el-form-item>
           <el-input style="margin-top: 10px;" class="inputSize" type="password" placeholder="密码"  prefix-icon="el-icon-erp-mima"
@@ -25,6 +25,8 @@
 </template>
 
 <script>
+  import manHeader from '@/assets/images/manHeader.jpg';
+  import wmHeader from '@/assets/images/wmHeader.jpg';
     export default {
       data() {
         return {
@@ -34,7 +36,8 @@
           },
           statusIcon: true,
           formItemSize: 'medium',
-          rememberMe: false
+          rememberMe: false,
+          imgSrc: manHeader
         }
       },
       name: "Login",
@@ -62,7 +65,8 @@
               params: {
                 userNameOrId: this.loginForm.account,
                 password: this.loginForm.password,
-                rememberMe: this.rememberMe
+                rememberMe: this.rememberMe,
+                fromLoginVue: true
               }
             }).then((res) => {
               let msg = res.data.msg;
@@ -85,6 +89,50 @@
               type: 'error'
             });
           });
+        },
+        handleImg: function() { //根据输入框请求服务器实现头像跟输入的用户头像对应
+          let that = this;
+          switch (this.loginForm.account) {
+            case '' : //如果账号/用户名框无输入则return不执行下面请求服务器的代码
+              return;
+            default :
+              this.$http.get('/api/sys/usr/getUserImg', {
+                params: {
+                  idOrName: this.loginForm.account
+                }
+              }).then(res => {
+                switch (res.data) {
+                  case '' : //如果头像不存在，即用户没有设置头像
+                    $.ajax({
+                      url: '/api/sys/usr/getUserByIdOrName', //根据输入账号或者用户名获取用户信息
+                      dataType: 'json',
+                      data: { idOrName: this.loginForm.account },
+                      async: false,
+                      success: function (result) {
+                        if (result.resultUser != null && result.resultUser != undefined || result.resultUser != '') {//如果存在这个用户
+                          that.imgSrc = result.resultUser.employee.sex == 0 ? wmHeader : manHeader; //如果是0 则女，头像为wmHeader，否则manHeader
+                          that.$store.dispatch('setAvatarUrl', result.resultUser.employee.sex == 0 ? wmHeader : manHeader)
+                        }
+                        else {
+                          that.imgSrc = manHeader;
+                          that.$store.dispatch('setAvatarUrl', manHeader);
+                        }
+                      }
+                    });
+                    break;
+                  default :
+                    that.imgSrc = 'data:image/png;base64,' + res.data; //如果头像存在，则直接设置头像为获取到的
+                    that.$store.dispatch('setAvatarUrl', 'data:image/png;base64,' + res.data);
+                }
+              }).catch(() => {
+                this.$notify({
+                  type: 'error',
+                  message: '从服务器获取头像失败',
+                  title: '系统提示',
+                  duration: 2000
+                });
+              });
+          }
         }
       },
       mounted() {
