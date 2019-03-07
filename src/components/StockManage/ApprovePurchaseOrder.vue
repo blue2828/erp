@@ -1,17 +1,17 @@
 <template>
   <div>
     <el-row>
-      <el-col :span="2"><el-button type="success" icon="el-icon-plus" @click="handleAdd">销售</el-button></el-col>
+      <el-col :span="2"><el-button type="success" icon="el-icon-plus" @click="handleAdd">采购</el-button></el-col>
       <el-col :span="3"><el-button type="danger" icon="el-icon-delete" @click="handleDelete(checkboxSelectData, -1, true)">批量退单</el-button></el-col>
       <el-col :span="2"><el-button type="info" icon="el-icon-printer" @click="handleExport">导出</el-button></el-col>
       <el-col :span="17">
         <el-input :clearable="true" style="width: 120px;" v-model="searchForm.goodsOrder" autocomplete="off" placeholder="订单编号"></el-input>
         <el-select v-model="selectedOrderType" clearable  placeholder="订单类型" style="width: 120px;">
-          <el-option label="销售订单" value="0"/>
-          <el-option label="销售退货" value="1"/>
+          <el-option label="采购订单" value="0"/>
+          <el-option label="采购退货" value="1"/>
         </el-select>
         <el-input :clearable="true" style="width: 120px;" v-model="searchForm.goodsName" autocomplete="off" placeholder="货品名称"></el-input>
-        <el-input :clearable="true" style="width: 120px;" v-model="searchForm.supName" autocomplete="off" placeholder="客户"></el-input>
+        <el-input :clearable="true" style="width: 120px;" v-model="searchForm.supName" autocomplete="off" placeholder="供应商"></el-input>
         <el-select v-model="selectedRepo" filterable clearable  placeholder="仓库" style="width: 120px;">
           <el-option
             v-for="item in repoOptions"
@@ -57,6 +57,9 @@
             <el-form-item label="订单号">
               <span>{{ props.row.orderNumber }}</span>
             </el-form-item>
+            <el-form-item label="订单类型">
+              <span>{{ props.row.p_o_type == 0 ? '采购订单' : '采购退货' }}</span>
+            </el-form-item>
             <el-form-item label="货品编号">
               <span>{{ props.row.goods.goodOrder }}</span>
             </el-form-item>
@@ -81,8 +84,8 @@
             <el-form-item label="数量">
               <span>{{ props.row.count }}</span>
             </el-form-item>
-            <el-form-item label="客户">
-              <span>{{ props.row.customer.cusName }}</span>
+            <el-form-item label="供应商">
+              <span>{{ props.row.supplier.supName }}</span>
             </el-form-item>
             <el-form-item label="订单创建时间">
               <span>{{ props.row.creatime }}</span>
@@ -90,10 +93,10 @@
             <el-form-item label="仓库">
               <span>{{ props.row.repository.repoName }}</span>
             </el-form-item>
-            <el-form-item label="出库时间">
-              <span>{{ props.row.takeTime }}</span>
+            <el-form-item label="入库时间">
+              <span>{{ props.row.inTime }}</span>
             </el-form-item>
-            <el-form-item label="销售员">
+            <el-form-item label="采购员">
               <span>{{ props.row.employee.empName }}</span>
             </el-form-item>
             <el-form-item label="审批状态">
@@ -175,14 +178,7 @@
             type="primary"
             icon="el-icon-edit"
             @click="handleEdit(scope.row)"
-          >编辑</el-button>
-          <el-button
-            size="mini"
-            type="danger"
-            icon="el-icon-delete"
-            circle
-            @click="handleDelete(scope.row.id, scope.row.index, false)"
-          >退单</el-button>
+          >审批</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -201,8 +197,9 @@
 </template>
 
 <script>
+  import goodsDefaultIcon from '@/assets/images/goodsDefaultIcon.jpg';
     export default {
-        name: "SaleOrder",
+        name: "ApprovePurchaseOrder",
       data () {
         return {
           tableData: [],
@@ -227,9 +224,10 @@
         fetchTableData () {
           let toRemoteParams = new URLSearchParams();
           //toRemoteParams.append('goods', this.searchForm);
+          toRemoteParams.append('isState4', false);
           toRemoteParams.append('pageEntity', { currentPage: this.currentPage, pageSize: this.pageSize });
           this.$http({
-            url: '/api/saleManage/saleOrder/queryAllSaleOrder',
+            url: '/api/baseConfig/goods/queryAllGoods',
             method: 'post',
             data: toRemoteParams
           }).then(res => {

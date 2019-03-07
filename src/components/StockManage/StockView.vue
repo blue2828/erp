@@ -1,41 +1,13 @@
 <template>
   <div>
     <el-row>
-      <el-col :span="2"><el-button type="success" icon="el-icon-plus" @click="handleAdd">销售</el-button></el-col>
-      <el-col :span="3"><el-button type="danger" icon="el-icon-delete" @click="handleDelete(checkboxSelectData, -1, true)">批量退单</el-button></el-col>
-      <el-col :span="2"><el-button type="info" icon="el-icon-printer" @click="handleExport">导出</el-button></el-col>
-      <el-col :span="17">
-        <el-input :clearable="true" style="width: 120px;" v-model="searchForm.goodsOrder" autocomplete="off" placeholder="订单编号"></el-input>
-        <el-select v-model="selectedOrderType" clearable  placeholder="订单类型" style="width: 120px;">
-          <el-option label="销售订单" value="0"/>
-          <el-option label="销售退货" value="1"/>
-        </el-select>
+      <el-col :span="13">
+        <el-button type="info" icon="el-icon-printer" @click="handleExport">导出</el-button>
         <el-input :clearable="true" style="width: 120px;" v-model="searchForm.goodsName" autocomplete="off" placeholder="货品名称"></el-input>
-        <el-input :clearable="true" style="width: 120px;" v-model="searchForm.supName" autocomplete="off" placeholder="客户"></el-input>
-        <el-select v-model="selectedRepo" filterable clearable  placeholder="仓库" style="width: 120px;">
-          <el-option
-            v-for="item in repoOptions"
-            :key="item.id"
-            :label="item.repoName"
-            :value="item.id">
-          </el-option>
-        </el-select>
-      </el-col>
-    </el-row>
-    <el-row style="margin-top: 4px;">
-      <el-col :span="6">
-        <el-input :clearable="true" style="width: 130px;" v-model="searchForm.empName" autocomplete="off" placeholder="经办员工姓名"></el-input>
-        <el-select v-model="selectedCheckState" clearable  placeholder="审批状态" style="width: 120px;">
-          <el-option label="录入" value="1"/>
-          <el-option label="待审批" value="2"/>
-          <el-option label="审批不通过" value="3"/>
-          <el-option label="审批通过" value="4"/>
-        </el-select>
-      </el-col>
-      <el-col :span="2">
+        <el-input :clearable="true" style="width: 120px;" v-model="searchForm.type" autocomplete="off" placeholder="货品类别"></el-input>
+        <el-input :clearable="true" style="width: 120px;" v-model="searchForm.repoName" autocomplete="off" placeholder="仓库"></el-input>
         <el-button type="primary" icon="el-icon-search" @click="fetchTableData">搜索</el-button>
       </el-col>
-      <el-col :span="16"></el-col>
     </el-row>
     <el-table
       @selection-change="onTableChange"
@@ -54,9 +26,6 @@
       <el-table-column type="expand">
         <template slot-scope="props">
           <el-form label-position="left" inline class="demo-table-expand">
-            <el-form-item label="订单号">
-              <span>{{ props.row.orderNumber }}</span>
-            </el-form-item>
             <el-form-item label="货品编号">
               <span>{{ props.row.goods.goodOrder }}</span>
             </el-form-item>
@@ -72,46 +41,41 @@
             <el-form-item label="计量单位">
               <span>{{ props.row.goods.unit }}</span>
             </el-form-item>
-            <el-form-item label="单价">
-              <span>{{ props.row.unitPrice }}</span>
+            <el-form-item label="采购价">
+              <span>{{ props.row.goods.buyPrice }}</span>
             </el-form-item>
-            <el-form-item label="总价">
-              <span>{{ props.row.totalPrice }}</span>
+            <el-form-item label="零售价">
+              <span>{{ props.row.goods.salePrice }}</span>
             </el-form-item>
-            <el-form-item label="数量">
-              <span>{{ props.row.count }}</span>
+            <el-form-item label="库存量">
+              <span>{{ props.row.realCount }}</span>
             </el-form-item>
-            <el-form-item label="客户">
-              <span>{{ props.row.customer.cusName }}</span>
+            <el-form-item label="销售量">
+           <span>{{ props.row.saleCount }}</span>
             </el-form-item>
-            <el-form-item label="订单创建时间">
-              <span>{{ props.row.creatime }}</span>
-            </el-form-item>
-            <el-form-item label="仓库">
+            <el-form-item label="存放仓库">
               <span>{{ props.row.repository.repoName }}</span>
             </el-form-item>
-            <el-form-item label="出库时间">
-              <span>{{ props.row.takeTime }}</span>
+            <el-form-item label="采购价">
+              <span>{{ props.row.goods.buyPrice }}</span>
             </el-form-item>
-            <el-form-item label="销售员">
-              <span>{{ props.row.employee.empName }}</span>
+            <el-form-item label="销售价">
+              <span>{{ props.row.goods.salePrice }}</span>
             </el-form-item>
-            <el-form-item label="审批状态">
-              <span>{{ props.row.checkStateStr }}</span>
+            <el-form-item label="库存总值">
+              <span>{{ props.row.totalPrice }}</span>
             </el-form-item>
-            <el-form-item label="审批时间">
-              <span>{{ props.row.checkTime }}</span>
-            </el-form-item>
-            <el-form-item label="审批人">
-              <span>{{ props.row.user == undefined || props.row.user == null ? "" : props.row.user[0].userName }}</span>
+            <el-form-item label="售价总值">
+              <span>{{ props.row.totalSalePrice }}</span>
             </el-form-item>
           </el-form>
         </template>
       </el-table-column>
       <el-table-column
         align="center"
-        prop="orderNumber"
-        label="订单编号"
+        prop="goods.goodOrder"
+        label="货品编号"
+        :sortable="true"
       >
       </el-table-column>
       <el-table-column
@@ -124,6 +88,12 @@
       </el-table-column>
       <el-table-column
         align="center"
+        prop="goods.type"
+        label="商品类别"
+      >
+      </el-table-column>
+      <el-table-column
+        align="center"
         prop="goods.picture"
         label="货品图片"
       >
@@ -133,35 +103,31 @@
       </el-table-column>
       <el-table-column
         align="center"
-        prop="goods.unit"
-        label="计量单位">
+        prop="repository.repoName"
+        label="仓库">
+      </el-table-column>
+      <el-table-column
+        align="center"
+        prop="realCount"
+        label="库存量">
       </el-table-column>
       <el-table-column
         :sortable="true"
         align="center"
-        prop="unitPrice"
-        label="单价">
+        prop="saleCount"
+        label="销售量">
       </el-table-column>
       <el-table-column
+        :sortable="true"
         align="center"
         prop="totalPrice"
+        label="库存总值">
+      </el-table-column>
+      <el-table-column
+        align="center"
+        prop="totalSalePrice"
         :sortable="true"
-        label="总价">
-      </el-table-column>
-      <el-table-column
-        align="center"
-        prop="checkStateStr"
-        label="审批状态">
-      </el-table-column>
-      <el-table-column
-        align="center"
-        prop="checkTime"
-        label="审批时间">
-      </el-table-column>
-      <el-table-column
-        align="center"
-        prop="user[0].userName"
-        label="审批人">
+        label="售价总值">
       </el-table-column>
       <el-table-column
         align="center"
@@ -175,14 +141,14 @@
             type="primary"
             icon="el-icon-edit"
             @click="handleEdit(scope.row)"
-          >编辑</el-button>
+          >售出</el-button>
           <el-button
             size="mini"
             type="danger"
             icon="el-icon-delete"
             circle
             @click="handleDelete(scope.row.id, scope.row.index, false)"
-          >退单</el-button>
+          >调拨</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -201,8 +167,9 @@
 </template>
 
 <script>
+  import goodsDefaultIcon from '@/assets/images/goodsDefaultIcon.jpg';
     export default {
-        name: "SaleOrder",
+        name: "StockView",
       data () {
         return {
           tableData: [],
@@ -211,16 +178,9 @@
           pageSize: 10, //每页显示条目个数
           searchForm: {
             goodsName: '',
-            goodsOrder: '',
             type: '',
-            size: '',
-            buyPrice: 0.0,
-            salePrice: 0.0
-          },
-          selectedOrderType: '',
-          repoOptions: [],
-          selectedRepo: '',
-          selectedCheckState: ''
+            repoName: ''
+          }
         }
       },
       methods: {
@@ -229,7 +189,7 @@
           //toRemoteParams.append('goods', this.searchForm);
           toRemoteParams.append('pageEntity', { currentPage: this.currentPage, pageSize: this.pageSize });
           this.$http({
-            url: '/api/saleManage/saleOrder/queryAllSaleOrder',
+            url: '/api/stockMange/stockView/queryAllStock',
             method: 'post',
             data: toRemoteParams
           }).then(res => {
@@ -238,10 +198,10 @@
             let tag = ['info', 'success', 'warning', 'danger'];
             let tempData = res.data.list.filter((value, index, arr) => {
               value.tag = tag[this.randomData(-1, 3)];
-              value.inTime = this.formatTimeStampToTime(value.inTime, false);
-              value.creatime = this.formatTimeStampToTime(value.creatime, false);
-              value.checkTime = this.formatTimeStampToTime(value.checkTime, false);
-              value.checkStateStr = value.checkState == 1 ? '录入' : value.checkState == 2 ? '待审批' : value.checkState == 3 ? "审批不通过" : '审批通过';
+              value.realCount = value.purchaseOrder.count - (this.isNotNulled(value.saleOrder) ? value.saleOrder.checkState == 4 ? value.saleOrder.count : 0 : 0);
+              value.saleCount = this.isNotNulled(value.saleOrder) ? value.saleOrder.checkState == 4 ? value.saleOrder.count : 0 : 0;
+              value.totalSalePrice = (value.purchaseOrder.count - (this.isNotNulled(value.saleOrder) ? value.saleOrder.checkState == 4 ? value.saleOrder.count : 0 : 0)) * value.goods.salePrice;
+              value.totalPrice = (value.purchaseOrder.count - (this.isNotNulled(value.saleOrder) ? value.saleOrder.checkState == 4 ? value.saleOrder.count : 0 : 0)) * value.goods.buyPrice;
               $.ajax({ //获取商品图片
                 url: '/api/baseConfig/goods/getGoodsImg',
                 async: false,

@@ -60,9 +60,9 @@
                      <span>库存管理</span>
                    </template>
                    <el-menu-item-group>
-                      <el-menu-item index="2-1">库存查看</el-menu-item>
-                      <el-menu-item index="2-2">销售审批</el-menu-item>
-                      <el-menu-item index="2-3">采购审批</el-menu-item>
+                      <el-menu-item index="/stockView">库存查看</el-menu-item>
+                      <el-menu-item index="/approveSaleOrder">销售审批</el-menu-item>
+                      <el-menu-item index="/approvePurchaseOrder">采购审批</el-menu-item>
                    </el-menu-item-group>
               </el-submenu>
               <el-submenu index="3">
@@ -71,8 +71,8 @@
                       <span>统计分析</span>
                     </template>
                     <el-menu-item-group>
-                       <el-menu-item index="3-1">采购分析</el-menu-item>
-                       <el-menu-item index="3-2">销售分析</el-menu-item>
+                       <el-menu-item index="/purchaseAnalysis">采购分析</el-menu-item>
+                       <el-menu-item index="/saleAnalysis">销售分析</el-menu-item>
                        </el-menu-item-group>
               </el-submenu>
               <el-submenu index="4">
@@ -116,7 +116,7 @@
             </div>
           </el-col>
         </el-main>
-        <el-footer></el-footer>
+        <el-footer style="height: 40px;"></el-footer>
       </el-container>
     </el-container>
   </el-container>

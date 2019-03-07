@@ -11,6 +11,11 @@ import SupplierManage from '@/components/BuyManage/SupplierManage';
 import CustomerManage from '@/components/SaleManage/CustomerManage';
 import BuyOrder from '@/components/BuyManage/BuyOrder';
 import SaleOrder from '@/components/SaleManage/SaleOrder';
+import StockView from '@/components/StockManage/StockView';
+import ApproveSaleOrder from '@/components/StockManage/ApproveSaleOrder';
+import ApprovePurchaseOrder from '@/components/StockManage/ApprovePurchaseOrder';
+import PurchaseAnalysis from '@/components/StatisticalAnalysis/PurchaseAnalysis';
+import SaleAnalysis from '@/components/StatisticalAnalysis/SaleAnalysis';
 Vue.use(Router)
 
 export default new Router({
@@ -26,7 +31,12 @@ export default new Router({
         { path: '/supplierManage', name: '供应商管理', component: SupplierManage, meta: { title: '供应商管理' } },
         { path: '/customerManage', name: '客户管理', component: CustomerManage, meta: { title: '供应商管理' } },
         { path: '/buyOrder', name: '采购订单', component: BuyOrder, meta: { title: '采购订单' } },
-        { path: '/saleOrder', name: '销售订单', component: SaleOrder, meta: { title: '销售订单' } }
+        { path: '/saleOrder', name: '销售订单', component: SaleOrder, meta: { title: '销售订单' } },
+        { path: '/stockView', name: '库存查看', component: StockView, meta: { title: '库存查看' } },
+        { path: '/approveSaleOrder', name: '销售审批', component: ApproveSaleOrder, meta: { title: '销售审批' } },
+        { path: '/approvePurchaseOrder', name: '采购审批', component: ApprovePurchaseOrder, meta: { title: '采购审批' } },
+        { path: '/purchaseAnalysis', name: '采购分析', component: PurchaseAnalysis, meta: { title: '采购分析' } },
+        { path: '/saleAnalysis', name: '销售分析', component: SaleAnalysis, meta: { title: '销售分析' } }
       ]
     }
   ]

@@ -17,8 +17,10 @@ import App from './App'
 import Vuex from 'vuex';
 import $ from 'jquery'
 import store from './store/store.js';
+import echarts from 'echarts';
+Vue.prototype.$echarts = echarts;
 Vue.prototype.$http = axios;
-Vue.config.productionTip = false
+Vue.config.productionTip = false;
 Vue.use(formatTimeStampToTime);
 Vue.use(randomData);
 Vue.use(isImg);

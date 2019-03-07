@@ -8,7 +8,7 @@
         <el-input :clearable="true" style="width: 120px;" v-model="searchForm.goodsOrder" autocomplete="off" placeholder="货品编号"></el-input>
         <el-input :clearable="true" style="width: 120px;" v-model="searchForm.goodsName" autocomplete="off" placeholder="货品名称"></el-input>
         <el-input :clearable="true" style="width: 120px;" v-model="searchForm.size" autocomplete="off" placeholder="货品规格"></el-input>
-        <el-input :clearable="true" style="width: 120px;" v-model="searchForm.type" autocomplete="off" placeholder="货品类型"></el-input>
+        <el-input :clearable="true" style="width: 120px;" v-model="searchForm.g_type" autocomplete="off" placeholder="货品类型"></el-input>
         <el-input :clearable="true" style="width: 120px;" v-model="searchForm.buyPrice" autocomplete="off" placeholder="采购价"></el-input>
         <el-input :clearable="true" style="width: 120px;" v-model="searchForm.salePrice" autocomplete="off" placeholder="零售价"></el-input>
       </el-col>
@@ -46,7 +46,7 @@
               <span>{{ props.row.size }}</span>
             </el-form-item>
             <el-form-item label="货品类型">
-              <span>{{ props.row.type }}</span>
+              <span>{{ props.row.g_type }}</span>
             </el-form-item>
             <el-form-item label="计量单位">
               <span>{{ props.row.unit }}</span>
@@ -104,7 +104,7 @@
       </el-table-column>
       <el-table-column
         align="center"
-        prop="type"
+        prop="g_type"
         label="货品类型">
       </el-table-column>
       <el-table-column
@@ -180,7 +180,7 @@
             searchForm: {
               goodsName: '',
               goodsOrder: '',
-              type: '',
+              g_type: '',
               size: '',
               buyPrice: 0.0,
               salePrice: 0.0
@@ -190,7 +190,7 @@
         methods: {
           fetchTableData () {
             let toRemoteParams = new URLSearchParams();
-            toRemoteParams.append('goods', this.searchForm);
+            //toRemoteParams.append('goods', this.searchForm);
             toRemoteParams.append('pageEntity', { currentPage: this.currentPage, pageSize: this.pageSize });
             toRemoteParams.append('isState4', true);
             this.$http({
@@ -206,7 +206,7 @@
                 value.goodOrder = value.goods.goodOrder;
                 value.goodsName = value.goods.goodsName;
                 value.size = value.goods.size;
-                value.type = value.goods.type;
+                value.g_type = value.goods.g_type;
                 value.unit = value.goods.unit;
                 value.buyPrice = value.goods.buyPrice;
                 value.salePrice = value.goods.salePrice;

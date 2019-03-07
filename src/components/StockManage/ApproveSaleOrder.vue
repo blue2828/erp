@@ -1,8 +1,6 @@
 <template>
   <div>
     <el-row>
-      <el-col :span="2"><el-button type="success" icon="el-icon-plus" @click="handleAdd">销售</el-button></el-col>
-      <el-col :span="3"><el-button type="danger" icon="el-icon-delete" @click="handleDelete(checkboxSelectData, -1, true)">批量退单</el-button></el-col>
       <el-col :span="2"><el-button type="info" icon="el-icon-printer" @click="handleExport">导出</el-button></el-col>
       <el-col :span="17">
         <el-input :clearable="true" style="width: 120px;" v-model="searchForm.goodsOrder" autocomplete="off" placeholder="订单编号"></el-input>
@@ -175,14 +173,7 @@
             type="primary"
             icon="el-icon-edit"
             @click="handleEdit(scope.row)"
-          >编辑</el-button>
-          <el-button
-            size="mini"
-            type="danger"
-            icon="el-icon-delete"
-            circle
-            @click="handleDelete(scope.row.id, scope.row.index, false)"
-          >退单</el-button>
+          >审批</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -201,8 +192,9 @@
 </template>
 
 <script>
+  import goodsDefaultIcon from '@/assets/images/goodsDefaultIcon.jpg';
     export default {
-        name: "SaleOrder",
+        name: "ApproveSaleOrder",
       data () {
         return {
           tableData: [],
