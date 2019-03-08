@@ -36,7 +36,7 @@
               <span>{{ props.row.goods.size }}</span>
             </el-form-item>
             <el-form-item label="货品类型">
-              <span>{{ props.row.goods.type }}</span>
+              <span>{{ props.row.goods.g_type }}</span>
             </el-form-item>
             <el-form-item label="计量单位">
               <span>{{ props.row.goods.unit }}</span>
@@ -88,7 +88,7 @@
       </el-table-column>
       <el-table-column
         align="center"
-        prop="goods.type"
+        prop="goods.g_type"
         label="商品类别"
       >
       </el-table-column>
@@ -198,10 +198,10 @@
             let tag = ['info', 'success', 'warning', 'danger'];
             let tempData = res.data.list.filter((value, index, arr) => {
               value.tag = tag[this.randomData(-1, 3)];
-              value.realCount = value.purchaseOrder.count - (this.isNotNulled(value.saleOrder) ? value.saleOrder.checkState == 4 ? value.saleOrder.count : 0 : 0);
-              value.saleCount = this.isNotNulled(value.saleOrder) ? value.saleOrder.checkState == 4 ? value.saleOrder.count : 0 : 0;
-              value.totalSalePrice = (value.purchaseOrder.count - (this.isNotNulled(value.saleOrder) ? value.saleOrder.checkState == 4 ? value.saleOrder.count : 0 : 0)) * value.goods.salePrice;
-              value.totalPrice = (value.purchaseOrder.count - (this.isNotNulled(value.saleOrder) ? value.saleOrder.checkState == 4 ? value.saleOrder.count : 0 : 0)) * value.goods.buyPrice;
+              value.realCount = value.purchaseOrder.count - (this.isNotNulled(value.saleOrder) ? value.saleOrder.checkState == 3 ? value.saleOrder.count : 0 : 0);
+              value.saleCount = this.isNotNulled(value.saleOrder) ? value.saleOrder.checkState == 3 ? value.saleOrder.count : 0 : 0;
+              value.totalSalePrice = (value.purchaseOrder.count - (this.isNotNulled(value.saleOrder) ? value.saleOrder.checkState == 3 ? value.saleOrder.count : 0 : 0)) * value.goods.salePrice;
+              value.totalPrice = (value.purchaseOrder.count - (this.isNotNulled(value.saleOrder) ? value.saleOrder.checkState == 3 ? value.saleOrder.count : 0 : 0)) * value.goods.buyPrice;
               $.ajax({ //获取商品图片
                 url: '/api/baseConfig/goods/getGoodsImg',
                 async: false,

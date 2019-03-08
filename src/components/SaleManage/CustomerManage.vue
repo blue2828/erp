@@ -88,7 +88,7 @@
       <el-table-column
         align="center"
         label="操作"
-        width="150"
+        width="160"
       >
         <template slot-scope="scope">
           <el-button
@@ -135,7 +135,7 @@
         }
       },
       methods: {
-        fetchTableData () {
+        fetchTableData () { //获取客户列表
           let toRemoteParams = new URLSearchParams();
           toRemoteParams.append('cusName', this.searchSth);
           toRemoteParams.append('pageEntity', { currentPage: this.currentPage, pageSize: this.pageSize });

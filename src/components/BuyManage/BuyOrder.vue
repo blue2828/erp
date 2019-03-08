@@ -156,7 +156,7 @@
 
             >
               <el-date-picker
-                v-model="form.inTime"
+                v-model="form.inTimeStr"
                 type="datetime"
                 placeholder="选择日期时间">
               </el-date-picker>
@@ -175,8 +175,8 @@
       </div>
     </el-dialog>
     <el-row>
-      <el-col :span="2"><el-button type="success" icon="el-icon-plus" @click="handleAdd">采购</el-button></el-col>
-      <el-col :span="3"><el-button type="danger" icon="el-icon-delete" @click="handleCancel(checkboxSelectData, -1, true)">批量退单</el-button></el-col>
+      <el-col :span="2"><el-button type="success" icon="el-icon-erp-caigoudingdan" @click="handleAdd">采购</el-button></el-col>
+      <el-col :span="3"><el-button type="danger" @click="handleCancel(checkboxSelectData, -1, true)">批量退单</el-button></el-col>
       <el-col :span="2"><el-button type="info" icon="el-icon-printer" @click="handleExport">导出</el-button></el-col>
       <el-col :span="17">
         <el-input :clearable="true" style="width: 120px;" v-model="searchFormForPOrder.orderNumber" autocomplete="off" placeholder="订单编号"></el-input>
@@ -358,9 +358,8 @@
           <el-button
             size="mini"
             type="danger"
-            icon="el-icon-delete"
             circle
-            @click="handleCancel(scope.row.id, scope.row.index, false)"
+            @click="handleCancel(scope.row.p_o_id, scope.row.index, false)"
           >退单</el-button>
         </template>
       </el-table-column>
@@ -385,8 +384,8 @@
         name: "BuyOrder",
       data () {
         return {
-          tableData: [],
-          currentPage: 1,
+          tableData: [], //数据源属性，初始化为一个空的数组
+          currentPage: 1, //当前页初始化为
           total: 0, //总条目数
           pageSize: 10, //每页显示条目个数
           searchFormForGood: {
@@ -422,10 +421,11 @@
             count: '',
             salePrice: '',
             selectedEp: '',
-            inTime: '',
+            inTimeStr: '',
             p_o_id: ''
           },
           empOptions: [],
+          checkboxSelectData: [],
           formLabelWidth: '120px',
           repoOptions: [],
           spOptions: [],
@@ -446,11 +446,11 @@
         }
       },
       methods: {
-        onImgSelectChange (file, fileList) {
+        onImgSelectChange (file, fileList) { //图片选取后的执行的函数
           this.formImageUrl = URL.createObjectURL(file.raw);
           this.isSelectedImgFile = true;
         },
-        handleAvatarSuccess (res, file) {
+        handleAvatarSuccess (res, file) { //图片上传成功后的函数
           let that = this;
           this.showBtnLoading = false;
           switch (res.success) {
@@ -474,7 +474,7 @@
           this.dialogFormVisible = false;
           this.closeInfoFrame();
         },
-        beforeAvatarUpload (file) {
+        beforeAvatarUpload (file) { //图片上传前执行的函数
           let isImage = this.isImg(file.type);
           if (!isImage) {
             this.$message.error({
@@ -492,7 +492,7 @@
           });
           return promise;
         },
-        closeInfoFrame () {
+        closeInfoFrame () { //清空表单
           this.dialogFormVisible = false;
           this.$refs.goodForm.resetFields();
           this.selectedSupplier = '';
@@ -504,7 +504,7 @@
           this.formImageUrl = goodsDefaultIcon;
           this.form.mark = '';
         },
-        handleSubmit () {
+        handleSubmit () { //提交表单
           this.showBtnLoading = true;
           let params = this.form;
           switch (this.isEdit) { //如果是添加的是把id去掉，不然后台会报类型转换错误
@@ -512,12 +512,13 @@
               delete params.g_id;
               break;
           }
-          this.isNotNulled(params.inTime) ? delete params.inTime : undefined;
+          !this.isEdit ? delete params.p_o_id : undefined;
           params.isEdit = this.isEdit;
           params.handleUserId = this.$store.getters.getCurrentUser.id;
           params.supId = this.selectedSupplier;
           params.repoId = this.selectedRepo;
           params.state = this.isPay;
+          params.inTimeStr = this.isNotNulled(params.inTimeStr) ? this.formatTimeStampToTime(params.inTimeStr, false) : '';
           this.currentEditOrder = params;
           this.$refs['goodForm'].validate(valid => {
             switch (valid) {
@@ -589,7 +590,7 @@
                   this.$refs.uploadField.submit();
                   return false;
                 }
-                this.$http.get('/api/buyManage/purchaseOrder/savePurchaseOrder', {
+                this.$http.get('/api/buyManage/purchaseOrder/savePurchaseOrder', { //请求保存订单的ajax /api表示的事http://localhost:8088/
                   params: params
                 }).then(res => {
                   this.showBtnLoading = false;
@@ -606,6 +607,7 @@
                         clearTimeout(timer);
                       }, 1000);
                       this.dialogFormVisible = false;
+                      this.closeInfoFrame();
                       break;
                     default :
                       this.$message.error({
@@ -636,8 +638,13 @@
           this.searchFormForPOrder.checkState = this.isNotNulled(this.searchFormForPOrder.checkState) ? -1 : this.searchFormForPOrder.checkState;
           this.searchFormForPOrder.p_o_type = this.isNotNulled(this.searchFormForPOrder.p_o_type) ? -1 : this.searchFormForPOrder.p_o_type;
         },
-        fetchTableData () {
-          $.post('/api/baseConfig/goods/queryAllGoods', {
+        fetchTableData () {//请求后台数据的方法
+
+          $.post('/api/baseConfig/goods/queryAllGoods', { //jquery的ajax请求后台拿到订单列表数据、
+            //此花括号里面的7个属性是模糊查询的用到的几个属性 orderNumber:tb_purchase_order表的订单号 goodsName: tb_goods的goodsName字段
+            /*
+              p_o_type对应的事tb_purchase_order的p_o_type的字段  supName对应的是tb_supplier对应的supName字段 id对应的事tb_repo表的id
+            */
             orderNumber: this.searchFormForPOrder.orderNumber, p_o_type: this.searchFormForPOrder.p_o_type == '' ? -1 : this.searchFormForPOrder.p_o_type,
             goodsName: this.searchFormForGood.goodsName,
             supName: this.searchFormForSupplier.supName,
@@ -647,7 +654,7 @@
             currentPage: this.currentPage, pageSize: this.pageSize
           }, (res) => {
             let _this = this;
-            this.total = res.count;
+            this.total = res.count; //后台返回的列表记录的条数
             let tag = ['info', 'success', 'warning', 'danger'];
             let tempData = res.list.filter((value, index, arr) => {
               value.tag = tag[this.randomData(-1, 3)];
@@ -681,59 +688,12 @@
             });
             this.tableData = tempData;
           }, 'json');
-         /* this.$http({
-            url: '/api/baseConfig/goods/queryAllGoods',
-            method: 'post',
-            data: toRemoteParams,
-            contentType: 'application/json;charset=UTF-8'
-          }).then(res => {
-            let _this = this;
-            this.total = res.data.count;
-            let tag = ['info', 'success', 'warning', 'danger'];
-            let tempData = res.data.list.filter((value, index, arr) => {
-              value.tag = tag[this.randomData(-1, 3)];
-              value.inTime = this.formatTimeStampToTime(value.inTime, false);
-              value.creatime = this.formatTimeStampToTime(value.creatime, false);
-              value.checkTime = this.formatTimeStampToTime(value.checkTime, false);
-              value.checkStateStr = value.checkState == 1 ? '待审批' : value.checkState == 2 ? '审批不通过' : value.checkState == 3 ? "审批通过" : '待审批';
-              $.ajax({ //获取商品图片
-                url: '/api/baseConfig/goods/getGoodsImg',
-                async: false,
-                dataType: 'json',
-                data: { id: value.goods.g_id },
-                success: function (res) {
-                  switch (res) {
-                    case '' : //如果头像不存在，即用户没有设置头像
-                      value.goods.picture = goodsDefaultIcon;
-                      break;
-                    default :
-                      value.goods.picture = 'data:image/png;base64,' + res
-                  }
-                },
-                error: function (e) {
-                  _this.$message({
-                    type: 'error',
-                    message: '请求服务器获取商品图片失败',
-                    showClose: true
-                  });
-                }
-              });
-              return arr;
-            });
-            this.tableData = tempData;
-          }).catch(() => {
-            this.$message.error({
-              showClose: true,
-              duration: 2000,
-              message: '获取货品信息失败'
-            });
-          });*/
         },
-        prevClick (val) {
+        prevClick (val) { //点击上一页
           this.currentPage = val;
           this.fetchTableData ();
         },
-        nextClick (val) {
+        nextClick (val) { //点击下一页
           this.currentPage = val;
           this.fetchTableData()
         },
@@ -741,17 +701,70 @@
           this.currentPage = val;
           this.fetchTableData();
         },
-        handleAdd () {
-          this.showExtraFormItem = false;
-          this.formImageUrl = goodsDefaultIcon;
-          this.dialogFormVisible = true;
-          this.dialogTitle = '采购';
+        handleAdd () { //采购
+          this.showExtraFormItem = false; //设置采购员和入库时间两个input框为不显示
+          this.formImageUrl = goodsDefaultIcon; //设置弹出层的图片为默认图片
+          this.dialogFormVisible = true; //设置弹出层显示
+          this.dialogTitle = '采购'; //
         },
-        onTableChange () {
-
+        onTableChange (selection) {
+          switch (selection.length) {
+            case 0 :
+              this.checkboxSelectData = [];
+              break;
+            default:
+              this.checkboxSelectData = selection;
+          }
         },
-        handleCancel () {
-
+        handleCancel (id, index, dulpicate) {
+          if (dulpicate && this.checkboxSelectData.length == 0) {
+            this.$message.error({
+              showClose: true,
+              duration: 2000,
+              message: '请选择需要退单的行'
+            });
+            return;
+          }
+          this.$confirm('确定要退单吗', '系统提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            let ids = [];
+            switch (dulpicate) {
+              case true :
+                this.checkboxSelectData.forEach((value, index, arr) => {
+                  ids.push(value.p_o_id);
+                });
+                break;
+            }
+            this.$http.get('/api/buyManage/purchaseOrder/purchaseOrderCancel', {
+              params: {
+                p_o_id: dulpicate ? ids.join(",") : id
+              }
+            }).then(res => {
+              switch (res.data.success) {
+                case true :
+                  this.$message.success({
+                    showClose: true,
+                    message: '退单成功'
+                  });
+                  this.fetchTableData();
+                  break;
+                default :
+                  this.$message.error({
+                    showClose: true,
+                    message: !this.isNotNulled(res.data.errMsg) ? "退单失败" : res.data.errMsg
+                  });
+              }
+            }).catch(() => {
+              this.$message({
+                showClose: true,
+                type: 'error',
+                message: '服务器请求失败'
+              });
+            });
+          });
         },
         handleExport () {
 
@@ -771,7 +784,7 @@
               count: info.count,
               salePrice: info.goods.salePrice,
               selectedEp: info.employee.id,
-              inTime: new Date(info.inTime),
+              inTimeStr: new Date(info.inTime),
               p_o_id: info.p_o_id
           },
           this.selectedSupplier = info.supplier.id;
@@ -824,7 +837,7 @@
           });
         }
       },
-      created () {
+      created () { //vue组件创建生命周期函数
         this.fetchTableData();
         this.fetchSupplier();
         this.fetchRepo();

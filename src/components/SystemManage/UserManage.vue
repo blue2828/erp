@@ -418,7 +418,6 @@
           });
         },
         handleExport () {
-
           if (this.checkboxSelectData.length == 0) {
             this.$message.error({
               showClose: true,

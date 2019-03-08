@@ -2,7 +2,7 @@
     <div style="border: 1px solid white;background: white;width: 100%;">
       <el-row style="margin-top: 10px;">
         <el-col :span="12">
-          <el-button @click="btnClick(index, value, true, false)" v-for="(value, index) in firstBtns" :type="value.type" :size="value.size">{{ value.text }}</el-button>
+          <el-button @click="btnClick(index, value, true, false)" :key="index" v-for="(value, index) in firstBtns" :type="value.type" :size="value.size">{{ value.text }}</el-button>
         </el-col>
       </el-row>
       <el-row style="margin-top: 10px;">
@@ -10,7 +10,7 @@
           <span style="color: #606266;">日期</span>
           <el-date-picker type="daterange" v-model="daterange" range-separator="至"
                           start-placeholder="开始日期" end-placeholder="结束日期"/>
-          <el-button @click="btnClick(index, value, false, true)" v-for="(value, index) in secodeBtns" :type="value.type" :size="value.size">{{ value.text }}</el-button>
+          <el-button @click="btnClick(index, value, false, true)" :key="index" v-for="(value, index) in secodeBtns" :type="value.type" :size="value.size">{{ value.text }}</el-button>
         </el-col>
       </el-row>
       <el-row>
@@ -186,7 +186,7 @@
           };
           myChart.setOption(option);
         },
-        fetchDatas () {
+        fetchDatas () { //获取订单数据
           let selectedSecondBtn = this.secodeBtns.filter((val, index, arr) => {
             return val.type == 'success';
           });

@@ -1,8 +1,8 @@
 <template>
   <div>
     <el-row>
-      <el-col :span="2"><el-button type="success" icon="el-icon-plus" @click="handleAdd">销售</el-button></el-col>
-      <el-col :span="3"><el-button type="danger" icon="el-icon-delete" @click="handleDelete(checkboxSelectData, -1, true)">批量退单</el-button></el-col>
+      <el-col :span="2"><el-button type="success" icon="el-icon-erp-xiaoshou" @click="handleSale">销售</el-button></el-col>
+      <el-col :span="3"><el-button type="danger"  @click="handleDelete(checkboxSelectData, -1, true)">批量退单</el-button></el-col>
       <el-col :span="2"><el-button type="info" icon="el-icon-printer" @click="handleExport">导出</el-button></el-col>
       <el-col :span="17">
         <el-input :clearable="true" style="width: 120px;" v-model="searchForm.goodsOrder" autocomplete="off" placeholder="订单编号"></el-input>
@@ -26,10 +26,9 @@
       <el-col :span="6">
         <el-input :clearable="true" style="width: 130px;" v-model="searchForm.empName" autocomplete="off" placeholder="经办员工姓名"></el-input>
         <el-select v-model="selectedCheckState" clearable  placeholder="审批状态" style="width: 120px;">
-          <el-option label="录入" value="1"/>
-          <el-option label="待审批" value="2"/>
-          <el-option label="审批不通过" value="3"/>
-          <el-option label="审批通过" value="4"/>
+          <el-option label="待审批" value="1"/>
+          <el-option label="审批不通过" value="2"/>
+          <el-option label="审批通过" value="3"/>
         </el-select>
       </el-col>
       <el-col :span="2">
@@ -241,7 +240,7 @@
               value.inTime = this.formatTimeStampToTime(value.inTime, false);
               value.creatime = this.formatTimeStampToTime(value.creatime, false);
               value.checkTime = this.formatTimeStampToTime(value.checkTime, false);
-              value.checkStateStr = value.checkState == 1 ? '录入' : value.checkState == 2 ? '待审批' : value.checkState == 3 ? "审批不通过" : '审批通过';
+              value.checkStateStr = value.checkState == 1 ? '待审批' : value.checkState == 2 ? '审批不通过' : value.checkState == 3 ? "审批通过" : '待审批';
               $.ajax({ //获取商品图片
                 url: '/api/baseConfig/goods/getGoodsImg',
                 async: false,
@@ -287,8 +286,15 @@
           this.currentPage = val;
           this.fetchTableData();
         },
-        handleAdd () {
-
+        handleSale () {
+          this.$confirm('前往库存查看销售？', '系统提示', {
+            confirmButtonText: '前往',
+            cancelButtonText: '留在本页',
+            type: 'warning'
+          }).then(() => {
+            this.$router.push('/stockView');
+            this.$emit('headCallBack', '/stockView');
+          });
         },
         onTableChange () {
 

@@ -7,6 +7,7 @@
       router
       class="el-menu-demo"
       mode="horizontal"
+      v-on:headCallBack="headCall"
       background-color="#545c64"
       text-color="#fff"
       active-text-color="#ffd04b">
@@ -51,7 +52,7 @@
                   </template>
                   <el-menu-item-group>
                     <el-menu-item index="/customerManage">客户管理</el-menu-item>
-                    <el-menu-item index="saleOrder">销售订单</el-menu-item>
+                    <el-menu-item index="/saleOrder">销售订单</el-menu-item>
                   </el-menu-item-group>
               </el-submenu>
               <el-submenu index="2" >
@@ -232,11 +233,14 @@
       },
       sendMsg (msg) {
         this.socket.send(msg);
+      },
+      headCall: function (msg) { //回调方法，接收子组件传的参数
+        this.defaultUrl = msg;
       }
     },
     watch: {
-      '$router': function (newVal, oldVal) {
-        this.defaultUrl = this.$router.path;
+      $route: function (newVal, oldVal) {
+        this.defaultUrl = this.$route.path;
       }
     },
     created() {

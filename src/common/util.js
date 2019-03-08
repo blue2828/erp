@@ -80,13 +80,13 @@ export default {
       else
         return false;
     };
-    Vue.prototype.isThirtyOneDayOfMonth = function (month) {
+    Vue.prototype.isThirtyOneDayOfMonth = function (month) { //判断月份是不是31天的月份，即大月
       return [1, 3, 5, 7, 8, 10, 12].indexOf(month) > -1;
     };
-    Vue.prototype.isThirtyDayOfMonth = function (month) {
+    Vue.prototype.isThirtyDayOfMonth = function (month) { //判断月份是不是30天的月份，小月
       return [4, 6, 9, 11].indexOf(month) > -1;
     };
-    Vue.prototype.countDaysOfMonth = function (month, year) {
+    Vue.prototype.countDaysOfMonth = function (month, year) { //计算一个月多少天
       let count;
       switch (this.isThirtyOneDayOfMonth(month)) {
         case true :
@@ -111,7 +111,7 @@ export default {
     };
     Vue.prototype.isLeapYear = function (year) { //普通年能被4整除且不能被100整除的为闰年。（如2004年就是闰年,1900年不是闰年）世纪年能被400整除的是闰年，闰年2月29天。
       let flag = false;
-      if (year % 1000 == 0) { //世纪年
+      if (year % 100 == 0) { //世纪年
         if (year % 400 == 0)
           flag = true;
       } else {

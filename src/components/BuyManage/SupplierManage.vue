@@ -135,7 +135,7 @@
         }
       },
       methods: {
-        fetchTableData () {
+        fetchTableData () { //获取销售订单
           let toRemoteParams = new URLSearchParams();
           toRemoteParams.append('supplierName', this.searchSth);
           toRemoteParams.append('pageEntity', { currentPage: this.currentPage, pageSize: this.pageSize });

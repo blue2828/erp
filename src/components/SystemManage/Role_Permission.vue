@@ -32,10 +32,10 @@
       </el-table>
     </el-col>
     <el-col :span="19">
-      <div v-for="(value, index) in parentName">
+      <div v-for="(value, index) in parentName" :key="index" >
           <div :style="{ margin: index != 0 ? '16px 0 0 10px' : '0 0 0 10px', textAlign: 'left' }">
             <span style="font-size: 14px;color: #606266;margin-right: 20px;">{{ value.parentName }}</span>
-            <el-checkbox :label="val.name" name="type" v-for="val in value.sub" v-model="val.checked"></el-checkbox>
+            <el-checkbox :label="val.name" name="type" :key="key"  v-for="(val, key) in value.sub" v-model="val.checked"></el-checkbox>
           </div>
       </div>
       <div style="text-align: left;margin-top: 20px;">
@@ -63,7 +63,7 @@
           }
         },
       methods: {
-        fetchRoleTbData () {
+        fetchRoleTbData () { //
           return new Promise((resolve, reject) => {
             this.$http.get('/api/sys/role/queryAllRoles').then(res => {
               let roleIdsSet = new Set();
