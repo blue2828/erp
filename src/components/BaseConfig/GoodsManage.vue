@@ -259,7 +259,14 @@
             this.fetchTableData();
           },
           handleAdd () {
-
+            this.$confirm('前往采购？', '系统提示', {
+              confirmButtonText: '前往',
+              cancelButtonText: '留在本页',
+              type: 'warning'
+            }).then(() => {
+              this.$router.push({ path: '/buyOrder?msg=handleAdd' });
+              this.$emit('headCallBack', '/buyOrder')
+            });
           },
           onTableChange () {
 

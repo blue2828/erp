@@ -841,6 +841,9 @@
         this.fetchTableData();
         this.fetchSupplier();
         this.fetchRepo();
+      },
+      mounted () {
+        window.location.href.indexOf("handleAdd") > -1 ? this.handleAdd () : undefined;
       }
     }
 </script>

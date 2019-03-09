@@ -1,5 +1,70 @@
 <template>
   <div>
+    <el-dialog :modal-append-to-body="false" :title="dialogTitle" :visible.sync="dialogFormVisible">
+      <el-form :model="form" :hide-required-asterisk="true" ref="goodForm" :status-icon="true">
+        <el-row>
+          <el-col :span="10">
+            <el-form-item label="目标客户" :label-width="formLabelWidth"
+                          prop="customerId"
+            >
+              <el-select v-model="form.customerId" filterable clearable  placeholder="请选择">
+                <el-option
+                  v-for="item in cusOptions"
+                  :key="item.id"
+                  :label="item.cusName"
+                  :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="2"><span style="border: 1px solid white;"></span></el-col>
+          <el-col :span="10">
+            <el-form-item label="售出数量" :label-width="formLabelWidth"
+                          prop="count"
+                          :rules="[{ required: true, message: '请输入售出数量' }]"
+            >
+              <el-input :clearable="true" v-model="form.count" autocomplete="off"></el-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="10">
+            <el-form-item label="单价" :label-width="formLabelWidth"
+                          prop="unitPrice"
+                          :rules="[{ required: true, message: '请输入单价' }]"
+            >
+              <el-input :clearable="true" v-model="form.unitPrice" autocomplete="off"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="2"><span style="border: 1px solid white;"></span></el-col>
+          <el-col :span="10">
+            <el-form-item label="付款" :label-width="formLabelWidth"
+                          prop="state"
+            >
+              <el-select v-model="form.state" filterable clearable  placeholder="请选择">
+                <el-option
+                  label="已付款"
+                  value="0">
+                </el-option>
+                <el-option
+                  label="未付款"
+                  value="1">
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-form-item label="备注">
+            <el-input type="textarea" v-model="form.descs"></el-input>
+          </el-form-item>
+        </el-row>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="danger" @click="closeInfoFrame">取 消</el-button>
+        <el-button type="primary" @click="handleSubmit" :loading="showBtnLoading">确 定</el-button>
+      </div>
+    </el-dialog>
     <el-row>
       <el-col :span="13">
         <el-button type="info" icon="el-icon-printer" @click="handleExport">导出</el-button>
@@ -140,7 +205,7 @@
             circle
             type="primary"
             icon="el-icon-edit"
-            @click="handleEdit(scope.row)"
+            @click="handleSale(scope.row)"
           >售出</el-button>
           <el-button
             size="mini"
@@ -180,7 +245,20 @@
             goodsName: '',
             type: '',
             repoName: ''
-          }
+          },
+          formLabelWidth: '120px',
+          dialogTitle: '',
+          dialogFormVisible: false,
+          form: {
+            customerId: '',
+            unitPrice: '',
+            count: '',
+            descs: '',
+            state: ''
+          },
+          cusOptions: [],
+          showBtnLoading: false,
+          currentEditOrder: ''
         }
       },
       methods: {
@@ -198,10 +276,6 @@
             let tag = ['info', 'success', 'warning', 'danger'];
             let tempData = res.data.list.filter((value, index, arr) => {
               value.tag = tag[this.randomData(-1, 3)];
-              value.realCount = value.purchaseOrder.count - (this.isNotNulled(value.saleOrder) ? value.saleOrder.checkState == 3 ? value.saleOrder.count : 0 : 0);
-              value.saleCount = this.isNotNulled(value.saleOrder) ? value.saleOrder.checkState == 3 ? value.saleOrder.count : 0 : 0;
-              value.totalSalePrice = (value.purchaseOrder.count - (this.isNotNulled(value.saleOrder) ? value.saleOrder.checkState == 3 ? value.saleOrder.count : 0 : 0)) * value.goods.salePrice;
-              value.totalPrice = (value.purchaseOrder.count - (this.isNotNulled(value.saleOrder) ? value.saleOrder.checkState == 3 ? value.saleOrder.count : 0 : 0)) * value.goods.buyPrice;
               $.ajax({ //获取商品图片
                 url: '/api/baseConfig/goods/getGoodsImg',
                 async: false,
@@ -222,6 +296,22 @@
                     message: '请求服务器获取商品图片失败',
                     showClose: true
                   });
+                }
+              });
+              $.ajax({
+                url: '/api/saleManage/saleOrder/querySomeSaleOrder',
+                async: false,
+                dataType: 'json',
+                data: { g_id: value.goods.g_id },
+                success: function (result) {
+                  let saleCount = 0;
+                  result.list.forEach((val, key, array) => {
+                    saleCount += val.checkState == 3 ? val.count : 0;
+                  });
+                  value.realCount = value.purchaseOrder.count - saleCount;
+                  value.saleCount = saleCount;
+                  value.totalSalePrice = value.goods.salePrice * (value.purchaseOrder.count - saleCount);
+                  value.totalPrice = value.goods.buyPrice * (value.purchaseOrder.count - saleCount);
                 }
               });
               return arr;
@@ -259,8 +349,118 @@
         handleExport () {
 
         },
-        handleEdit () {
-
+        handleSale (row) {
+          this.dialogFormVisible = true;
+          this.dialogTitle = '商品销售';
+          this.currentEditOrder = row;
+          this.form.unitPrice = row.goods.salePrice;
+          this.fetchCusData().then(res => {
+            this.cusOptions = res;
+          });
+        },
+        fetchCusData () {
+          return new Promise((resolve, reject) => {
+            this.$http.get('/api/saleManage/customer/queryAllCustomer').then(res => {
+              resolve(res.data.list);
+            });
+          });
+        },
+        closeInfoFrame () { //清空表单
+          this.dialogFormVisible = false;
+          this.$refs.goodForm.resetFields();
+          this.form.customerId = '';
+          this.form.state = '';
+        },
+        handleSubmit () {
+          this.$confirm('确定要售出吗', '系统提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            this.showBtnLoading = true;
+            if (!this.isNotNulled(this.form.customerId)) {
+              this.$message.error({
+                showClose: true,
+                duration: 2000,
+                message: '请选择目标客户'
+              });
+              this.showBtnLoading = false;
+              return false;
+            }
+            if (!this.isNotNulled(this.form.state)) {
+              this.$message.error({
+                showClose: true,
+                duration: 2000,
+                message: '请选择付款项'
+              });
+              this.showBtnLoading = false;
+              return false;
+            }
+            if (this.form.count > this.currentEditOrder.realCount) {
+              this.$message.error({
+                showClose: true,
+                duration: 2000,
+                message: '欲售出数量已超出库存数量'
+              });
+              this.showBtnLoading = false;
+              return false;
+            }
+            this.$refs['goodForm'].validate(valid => {
+              if (valid) {
+                this.isNotNulled(this.form.count) ? undefined : this.form.count = 0;
+                this.isNotNulled(this.form.unitPrice) ? undefined : this.form.unitPrice = 0.0;
+                this.isNotNulled(this.form.state) ? undefined : this.form.state = 0;
+                this.form.goodId = this.currentEditOrder.goods.g_id;
+                this.form.repoId = this.currentEditOrder.repository.id;
+                let that = this;
+                $.ajax({
+                  url: '/api/saleManage/saleOrder/saveSaleOrder',
+                  method: 'post',
+                  dataType: 'json',
+                  data: that.form,
+                  success: function (res) {
+                    that.showBtnLoading = false;
+                    switch (res.success) {
+                      case true :
+                        that.$message({
+                          type: 'success',
+                          showClose: true,
+                          message: '保存成功',
+                          duration: 2000
+                        });
+                        let timer = setTimeout(() => {
+                          that.$router.push('/saleOrder');
+                          that.$emit('headCallBack', '/saleOrder');
+                        }, 1000);
+                        that.dialogFormVisible = false;
+                        that.closeInfoFrame();
+                        break;
+                      default :
+                        that.$message.error({
+                          showClose: true,
+                          message: res.errMsg,
+                          duration: 2000
+                        });
+                    }
+                    that.fetchTableData();
+                    that.dialogFormVisible = false;
+                  },
+                  error: function () {
+                    that.fetchTableData();
+                    that.showBtnLoading = false;
+                    that.$message.error({
+                      showClose: true,
+                      message: '连接服务器失败',
+                      duration: 2000
+                    });
+                  }
+                });
+              }else {
+                this.showBtnLoading = false;
+                return false;
+              }
+            });
+          });
         }
       },
       created () {

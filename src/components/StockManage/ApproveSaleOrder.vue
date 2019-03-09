@@ -1,8 +1,10 @@
 <template>
   <div>
     <el-row>
+      <el-col :span="2"><el-button type="success" @click="handleApprove(checkboxSelectData, -1, true, true)">批量审批</el-button></el-col>
+      <el-col :span="4"><el-button type="danger" @click="handleApprove(checkboxSelectData, -1, true, false)">批量取消审批</el-button></el-col>
       <el-col :span="2"><el-button type="info" icon="el-icon-printer" @click="handleExport">导出</el-button></el-col>
-      <el-col :span="17">
+      <el-col :span="14">
         <el-input :clearable="true" style="width: 120px;" v-model="searchForm.goodsOrder" autocomplete="off" placeholder="订单编号"></el-input>
         <el-select v-model="selectedOrderType" clearable  placeholder="订单类型" style="width: 120px;">
           <el-option label="销售订单" value="0"/>
@@ -24,10 +26,9 @@
       <el-col :span="6">
         <el-input :clearable="true" style="width: 130px;" v-model="searchForm.empName" autocomplete="off" placeholder="经办员工姓名"></el-input>
         <el-select v-model="selectedCheckState" clearable  placeholder="审批状态" style="width: 120px;">
-          <el-option label="录入" value="1"/>
-          <el-option label="待审批" value="2"/>
-          <el-option label="审批不通过" value="3"/>
-          <el-option label="审批通过" value="4"/>
+          <el-option label="待审批" value="1"/>
+          <el-option label="审批不通过" value="2"/>
+          <el-option label="审批通过" value="3"/>
         </el-select>
       </el-col>
       <el-col :span="2">
@@ -172,8 +173,8 @@
             circle
             type="primary"
             icon="el-icon-edit"
-            @click="handleEdit(scope.row)"
-          >审批</el-button>
+            @click="handleApprove(scope.row, scope.row.index, false, scope.row.checkState == 3 ? false : true)"
+          >{{ scope.row.checkState == 3 ? '取消审批' : '审批' }}</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -212,7 +213,8 @@
           selectedOrderType: '',
           repoOptions: [],
           selectedRepo: '',
-          selectedCheckState: ''
+          selectedCheckState: '',
+          checkboxSelectData: []
         }
       },
       methods: {
@@ -233,7 +235,7 @@
               value.inTime = this.formatTimeStampToTime(value.inTime, false);
               value.creatime = this.formatTimeStampToTime(value.creatime, false);
               value.checkTime = this.formatTimeStampToTime(value.checkTime, false);
-              value.checkStateStr = value.checkState == 1 ? '录入' : value.checkState == 2 ? '待审批' : value.checkState == 3 ? "审批不通过" : '审批通过';
+              value.checkStateStr = value.checkState == 1 ? '待审批' : value.checkState == 2 ? '审批不通过' : value.checkState == 3 ? "审批通过" : '待审批';
               $.ajax({ //获取商品图片
                 url: '/api/baseConfig/goods/getGoodsImg',
                 async: false,
@@ -282,8 +284,14 @@
         handleAdd () {
 
         },
-        onTableChange () {
-
+        onTableChange (selection) {
+          switch (selection.length) {
+            case 0 :
+              this.checkboxSelectData = [];
+              break;
+            default:
+              this.checkboxSelectData = selection;
+          }
         },
         handleDelete () {
 
@@ -291,8 +299,39 @@
         handleExport () {
 
         },
-        handleEdit () {
-
+        handleApprove (row, index, dulpicate, approveOp) {
+          if (dulpicate && this.checkboxSelectData.length == 0) {
+            this.$message.error({
+              showClose: true,
+              duration: 2000,
+              message: `请选择需要${approveOp ? `审批` : `取消审批`}的行`
+            });
+            return;
+          }
+          this.$confirm(`确定要${approveOp ? `审批` : `取消审批`}吗`, '系统提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            $.post('/api/saleManage/saleOrder/approveSaleOrder', {
+              checkState: approveOp ? 3 : 2,
+            }, (res) => {
+              switch (res.success) {
+                case true :
+                  this.$message.success({
+                    showClose: true,
+                    message: `${approveOp ? `审批成功` : `取消审批成功`}`
+                  });
+                  break;
+                default :
+                  this.$message.error({
+                    showClose: true,
+                    message: !this.isNotNulled(res.errMsg) ? `${approveOp ? `审批失败` : `取消审批失败`}` : res.errMsg
+                  });
+              }
+              this.fetchTableData();
+            }, 'json');
+          });
         }
       },
       created () {

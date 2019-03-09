@@ -170,15 +170,7 @@
         <template slot-scope="scope">
           <el-button
             size="mini"
-            circle
-            type="primary"
-            icon="el-icon-edit"
-            @click="handleEdit(scope.row)"
-          >编辑</el-button>
-          <el-button
-            size="mini"
             type="danger"
-            icon="el-icon-delete"
             circle
             @click="handleDelete(scope.row.id, scope.row.index, false)"
           >退单</el-button>
