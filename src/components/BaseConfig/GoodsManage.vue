@@ -1,16 +1,86 @@
 <template>
   <div>
+    <el-dialog :modal-append-to-body="false" :title="dialogTitle" :visible.sync="dialogFormVisible">
+      <el-form :model="form" :hide-required-asterisk="true" ref="goodForm" :status-icon="true">
+        <el-row>
+          <el-col :span="4"><div style="border: 1px solid white;"></div></el-col>
+          <el-col :span="16">
+            <el-upload
+              ref="uploadField"
+              class="avatar-uploader"
+              :auto-upload="false"
+              action="/api/baseConfig/goods/editGoods"
+              :show-file-list="false"
+              :data="currentEditGood"
+              :drag="true"
+              :on-change="onImgSelectChange"
+              :on-success="handleAvatarSuccess"
+              :before-upload="beforeAvatarUpload">
+              <img :src="formImageUrl" style="width: 120px;height: 120px;border: 4px solid rgba(68, 87, 107, 1);border-radius: 50%;">
+            </el-upload>
+            <el-progress v-if="showProgress" :stroke-width="10" :percentage="uploadPercentage" :status="uploadStatus"></el-progress>
+          </el-col>
+          <el-col :span="4"><div style="border: 1px solid white;"></div></el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="10">
+            <el-form-item label="货品名称" :label-width="formLabelWidth"
+                          prop="goodsName"
+                          :rules="[{ required: true, message: '货品名称不能为空' }]"
+            >
+              <el-input :clearable="true" v-model="form.goodsName" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-col :span="2"><div style="border: 1px solid white;"></div></el-col>
+          </el-col>
+          <el-col :span="10">
+            <el-form-item label="计量单位" :label-width="formLabelWidth"
+                          prop="unit"
+                          :rules="[{ required: true, message: '计量单位不能为空' }]"
+            >
+              <el-input :clearable="true" v-model="form.unit" autocomplete="off"></el-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="10">
+            <el-form-item label="货品类型" :label-width="formLabelWidth"
+                          prop="g_type"
+                          :rules="[{ required: true, message: '货品类型不能为空' }]"
+            >
+              <el-input :clearable="true" v-model="form.g_type" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-col :span="2"><div style="border: 1px solid white;"></div></el-col>
+          </el-col>
+          <el-col :span="10">
+            <el-form-item label="规格" :label-width="formLabelWidth"
+                          prop="size"
+                          :rules="[{ required: true, message: '规格不能为空' }]"
+            >
+              <el-input :clearable="true" v-model="form.size" autocomplete="off"></el-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-form-item label="备注">
+            <el-input type="textarea" v-model="form.mark"></el-input>
+          </el-form-item>
+        </el-row>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="danger" @click="closeInfoFrame">取 消</el-button>
+        <el-button type="primary" @click="handleSubmit" :loading="showBtnLoading">确 定</el-button>
+      </div>
+    </el-dialog>
     <el-row>
       <el-col :span="2"><el-button type="success" icon="el-icon-plus" @click="handleAdd">新增</el-button></el-col>
-      <el-col :span="3"><el-button type="danger" icon="el-icon-delete" @click="handleDelete(checkboxSelectData, -1, true)">批量删除</el-button></el-col>
       <el-col :span="2"><el-button type="info" icon="el-icon-printer" @click="handleExport">导出</el-button></el-col>
       <el-col :span="17">
-        <el-input :clearable="true" style="width: 120px;" v-model="searchForm.goodsOrder" autocomplete="off" placeholder="货品编号"></el-input>
+        <el-input :clearable="true" style="width: 120px;" v-model="searchForm.goodOrder" autocomplete="off" placeholder="货品编号"></el-input>
         <el-input :clearable="true" style="width: 120px;" v-model="searchForm.goodsName" autocomplete="off" placeholder="货品名称"></el-input>
         <el-input :clearable="true" style="width: 120px;" v-model="searchForm.size" autocomplete="off" placeholder="货品规格"></el-input>
         <el-input :clearable="true" style="width: 120px;" v-model="searchForm.g_type" autocomplete="off" placeholder="货品类型"></el-input>
-        <el-input :clearable="true" style="width: 120px;" v-model="searchForm.buyPrice" autocomplete="off" placeholder="采购价"></el-input>
-        <el-input :clearable="true" style="width: 120px;" v-model="searchForm.salePrice" autocomplete="off" placeholder="零售价"></el-input>
+        <el-input :clearable="true" style="width: 120px;" v-model="buyPrice" autocomplete="off" placeholder="采购价"></el-input>
+        <el-input :clearable="true" style="width: 120px;" v-model="salePrice" autocomplete="off" placeholder="零售价"></el-input>
       </el-col>
     </el-row>
     <el-row style="margin-top: 4px;">
@@ -143,13 +213,6 @@
             icon="el-icon-edit"
             @click="handleEdit(scope.row)"
           >编辑</el-button>
-          <el-button
-            size="mini"
-            type="danger"
-            icon="el-icon-delete"
-            circle
-            @click="handleDelete(scope.row.id, scope.row.index, false)"
-          >删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -179,72 +242,208 @@
             pageSize: 10, //每页显示条目个数
             searchForm: {
               goodsName: '',
-              goodsOrder: '',
+              goodOrder: '',
               g_type: '',
               size: '',
-              buyPrice: 0.0,
-              salePrice: 0.0
-            }
+              buyPrice: '',
+              salePrice: ''
+            },
+            form: {
+              goodsName: '',
+              unit: '',
+              g_type: '',
+              size: '',
+              mark: ''
+            },
+            showBtnLoading: false,
+            dialogTitle: '',
+            dialogFormVisible: false,
+            buyPrice: '',
+            salePrice: '',
+            checkboxSelectData: [],
+            showProgress: false,
+            formImageUrl: '',
+            uploadStatus: 'text',
+            uploadPercentage: 0,
+            currentEditGood: {},
+            formLabelWidth: '120px'
           }
         },
         methods: {
-          fetchTableData () {
-            let toRemoteParams = new URLSearchParams();
-            //toRemoteParams.append('goods', this.searchForm);
-            toRemoteParams.append('pageEntity', { currentPage: this.currentPage, pageSize: this.pageSize });
-            toRemoteParams.append('isState4', true);
-            this.$http({
-              url: '/api/baseConfig/goods/queryAllGoods',
-              method: 'post',
-              data: toRemoteParams
-            }).then(res => {
-              let _this = this;
-              this.total = res.data.count;
-              let tag = ['info', 'success', 'warning', 'danger'];
-              let tempData = res.data.list.filter((value, index, arr) => {
-                value.tag = tag[this.randomData(-1, 3)];
-                value.goodOrder = value.goods.goodOrder;
-                value.goodsName = value.goods.goodsName;
-                value.size = value.goods.size;
-                value.g_type = value.goods.g_type;
-                value.unit = value.goods.unit;
-                value.buyPrice = value.goods.buyPrice;
-                value.salePrice = value.goods.salePrice;
-                value.supName = value.supplier.supName;
-                value.repoName = value.repository.repoName;
-                value.mark = value.goods.mark;
-                $.ajax({ //获取商品图片
-                  url: '/api/baseConfig/goods/getGoodsImg',
-                  async: false,
-                  dataType: 'json',
-                  data: { id: value.goods.g_id },
-                  success: function (res) {
-                    switch (res) {
-                      case '' : //如果头像不存在，即用户没有设置头像
-                        value['picture'] = goodsDefaultIcon;
-                        break;
-                      default :
-                        value['picture'] = 'data:image/png;base64,' + res
-                    }
-                  },
-                  error: function (e) {
-                    _this.$message({
-                      type: 'error',
-                      message: '请求服务器获取商品图片失败',
-                      showClose: true
-                    });
-                  }
+          onImgSelectChange (file, fileList) { //图片选取后的执行的函数
+            this.formImageUrl = URL.createObjectURL(file.raw);
+            this.isSelectedImgFile = true;
+          },
+          handleAvatarSuccess (res, file) { //图片上传成功后的函数
+            let that = this;
+            this.showBtnLoading = false;
+            switch (res.success) {
+              case true :
+                this.uploadStatus = 'success';
+                this.uploadPercentage = 100;
+                let timer = setTimeout(() => {
+                  this.showProgress = false;
+                  clearTimeout(timer);
+                }, 2000);
+                break;
+              default :
+                this.$message.error({
+                  showClose: true,
+                  message: res.errMsg,
+                  duration: 2000
                 });
-                return arr;
-              });
-              this.tableData = tempData;
-            }).catch(() => {
+                this.showBtnLoading = false;
+            }
+            this.fetchTableData();
+            this.dialogFormVisible = false;
+            this.closeInfoFrame();
+          },
+          beforeAvatarUpload (file) { //图片上传前执行的函数
+            let isImage = this.isImg(file.type);
+            if (!isImage) {
               this.$message.error({
                 showClose: true,
-                duration: 2000,
-                message: '获取货品信息失败'
+                message: '不支持的图片格式',
+                duration: 2000
+              });
+              return false;
+            }
+            this.showProgress = true;
+            let promise = new Promise((resolve) => {
+              this.$nextTick(function () {
+                resolve(true);
               });
             });
+            return promise;
+          },
+          closeInfoFrame () { //清空表单
+            this.dialogFormVisible = false;
+            this.$refs.goodForm.resetFields();
+            this.showBtnLoading = false;
+            this.showProgress = false;
+            this.formImageUrl = goodsDefaultIcon;
+            this.form.mark = '';
+          },
+          fetchTableData () {
+           this.isNotNulled(this.buyPrice) ? this.searchForm.buyPrice = this.buyPrice : this.searchForm.buyPrice = -1.0;
+           this.isNotNulled(this.salePrice) ? this.searchForm.salePrice = this.salePrice : this.searchForm.salePrice = -1.0;
+           this.searchForm.currentPage = this.currentPage;
+           this.searchForm.pageSize = this.pageSize;
+           this.searchForm.isState4 = true;
+            let _this = this;
+            $.ajax({
+              url: '/api/baseConfig/goods/queryAllGoods',
+              method: 'post',
+              dataType: 'json',
+              data: _this.searchForm,
+              async: false,
+              success: function (res) {
+                _this.total = res.count;
+                let tag = ['info', 'success', 'warning', 'danger'];
+                let tempData = res.list.filter((value, index, arr) => {
+                  value.tag = tag[_this.randomData(-1, 3)];
+                  value.goodOrder = value.goods.goodOrder;
+                  value.goodsName = value.goods.goodsName;
+                  value.size = value.goods.size;
+                  value.g_type = value.goods.g_type;
+                  value.unit = value.goods.unit;
+                  value.buyPrice = value.goods.buyPrice;
+                  value.salePrice = value.goods.salePrice;
+                  value.supName = value.supplier.supName;
+                  value.repoName = value.repository.repoName;
+                  value.mark = value.goods.mark;
+                  $.ajax({ //获取商品图片
+                    url: '/api/baseConfig/goods/getGoodsImg',
+                    async: false,
+                    dataType: 'json',
+                    data: { id: value.goods.g_id },
+                    success: function (res) {
+                      switch (res) {
+                        case '' : //如果头像不存在，即用户没有设置头像
+                          value['picture'] = goodsDefaultIcon;
+                          break;
+                        default :
+                          value['picture'] = 'data:image/png;base64,' + res
+                      }
+                    },
+                    error: function (e) {
+                      _this.$message({
+                        type: 'error',
+                        message: '请求服务器获取商品图片失败',
+                        showClose: true
+                      });
+                    }
+                  });
+                  return arr;
+                });
+                _this.tableData = tempData;
+              },
+              error: function () {
+                _this.$message.error({
+                  showClose: true,
+                  duration: 2000,
+                  message: '获取货品信息失败'
+                });
+              }
+            });
+          },
+          handleSubmit () { //提交表单
+            this.showBtnLoading = true;
+            let params = this.form;
+            this.currentEditGood = params;
+            this.$refs['goodForm'].validate(valid => {
+              switch (valid) {
+                case true:
+                  if (this.isSelectedImgFile) {
+                    this.$refs.uploadField.submit();
+                    return false;
+                  }
+                  this.$http.get('/api/baseConfig/goods/editGoods', { //请求保存订单的ajax /api表示的事http://localhost:8088/
+                    params: params
+                  }).then(res => {
+                    this.showBtnLoading = false;
+                    switch (res.data.success) {
+                      case true :
+                        this.$message({
+                          type: 'success',
+                          showClose: true,
+                          message: '保存成功',
+                          duration: 2000
+                        });
+                        let timer = setTimeout(() => {
+                          this.showProgress = false;
+                          clearTimeout(timer);
+                        }, 1000);
+                        this.dialogFormVisible = false;
+                        this.closeInfoFrame();
+                        break;
+                      default :
+                        this.$message.error({
+                          showClose: true,
+                          message: res.data.errMsg,
+                          duration: 2000
+                        });
+                    }
+                    this.fetchTableData();
+                    this.dialogFormVisible = false;
+                  }).catch(() => {
+                    this.fetchTableData();
+                    this.showBtnLoading = false;
+                    this.$message.error({
+                      showClose: true,
+                      message: '连接服务器失败',
+                      duration: 2000
+                    });
+                  });
+                  break;
+                default:
+                  this.showBtnLoading = false;
+                  return false;
+              }
+            });
+          },
+          closeInfoFrame () {
+
           },
           prevClick (val) {
             this.currentPage = val;
@@ -268,17 +467,50 @@
               this.$emit('headCallBack', '/buyOrder')
             });
           },
-          onTableChange () {
-
-          },
-          handleDelete () {
-
+          onTableChange (selection) {
+            switch (selection.length) {
+              case 0 :
+                this.checkboxSelectData = [];
+                break;
+              default:
+                this.checkboxSelectData = selection;
+            }
           },
           handleExport () {
-
+            if (this.checkboxSelectData.length == 0) {
+              this.$message.error({
+                showClose: true,
+                duration: 2000,
+                message: '请选择需要导出的数据'
+              });
+              return;
+            }
+            let requiredAttr = ['goodOrder', 'goodsName', 'size', 'g_type', 'unit', 'buyPrice', 'salePrice', 'count', 'supName', 'repoName', 'mark'];
+            let copyData = [];
+            this.checkboxSelectData.forEach((value, index, arr) => {
+              let obj = {};
+              Object.keys(value).forEach((val, key, array) => {
+                if ($.inArray(val, requiredAttr) > -1)
+                  obj[val] = value[val];
+              });
+              copyData.push(obj);
+            });
+            let newdata = new URLSearchParams();
+            newdata.append("data", JSON.stringify(copyData));
+            window.open('/api/baseConfig/goods/exportGoodInfoToExcel?data=' + newdata, '_blank');
           },
-          handleEdit () {
-
+          handleEdit (row) {
+            this.formImageUrl = row.picture;
+            this.dialogTitle = '编辑商品';
+            this.dialogFormVisible = true;
+            this.form = {
+              g_id: row.goods.g_id,
+              goodsName: row.goodsName,
+              unit: row.unit,
+              g_type: row.g_type,
+              size: row.size,
+              mark: row.mark
+            };
           }
         },
       created () {

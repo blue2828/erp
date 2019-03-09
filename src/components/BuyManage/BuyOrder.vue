@@ -767,7 +767,61 @@
           });
         },
         handleExport () {
-
+          if (this.checkboxSelectData.length == 0) {
+            this.$message.error({
+              showClose: true,
+              duration: 2000,
+              message: '请选择需要导出的数据'
+            });
+            return;
+          }
+          let requiredAttr = ['orderNumber', 'p_o_type', 'goods', 'unitPrice', 'totalPrice', 'count', 'supplier', 'creatime', 'state', 'repository',
+            'inTime', 'employee', 'checkStateStr', 'checkTime', 'user'];
+          let copyData = [];
+          this.checkboxSelectData.forEach((value, index, arr) => {
+            let obj = {};
+            Object.keys(value).forEach((val, key, array) => {
+              if ($.inArray(val, requiredAttr) > -1) {
+                if (val == 'goods') {
+                  obj.goodOrder = value.goods.goodOrder;
+                  obj.goodsName = value.goods.goodsName;
+                  obj.size = value.goods.size;
+                  obj.g_type = value.goods.g_type;
+                  obj.unit = value.goods.unit;
+                  return true;
+                }
+                if (val == 'supplier') {
+                  obj.supName = value.supplier.supName;
+                  return true;
+                }
+                if (val == 'repository') {
+                  obj.repoName = value.repository.repoName;
+                  return true;
+                }
+                if (val == 'employee') {
+                  obj.empName = value.employee.empName;
+                  return true;
+                }
+                if (val == 'user') {
+                  obj.userName = value.user == undefined || value.user == null ? "" : value.user[0].userName;
+                  return true;
+                }
+                if (val == 'state') {
+                  obj.state = value.state == 0 ? "已付款" : '未付款';
+                  return true;
+                }
+                if (val == 'p_o_type') {
+                  obj.p_o_type = value.p_o_type == 0 ? "采购订单" : '采购退单';
+                  return true;
+                }
+                obj[val] = value[val];
+              }
+            });
+            copyData.push(obj);
+          });
+          let newdata = new URLSearchParams();
+          newdata.append("data", JSON.stringify(copyData));
+          window.open('/api/buyManage/purchaseOrder/exportPOrderInfoToExcel?data=' + newdata, '_blank');
         },
         handleEdit (info) {
           this.fetchEp();

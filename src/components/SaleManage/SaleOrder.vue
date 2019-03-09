@@ -2,17 +2,17 @@
   <div>
     <el-row>
       <el-col :span="2"><el-button type="success" icon="el-icon-erp-xiaoshou" @click="handleSale">销售</el-button></el-col>
-      <el-col :span="3"><el-button type="danger"  @click="handleDelete(checkboxSelectData, -1, true)">批量退单</el-button></el-col>
+      <el-col :span="3"><el-button type="danger"  @click="handleCancel(checkboxSelectData, -1, true)">批量退单</el-button></el-col>
       <el-col :span="2"><el-button type="info" icon="el-icon-printer" @click="handleExport">导出</el-button></el-col>
       <el-col :span="17">
-        <el-input :clearable="true" style="width: 120px;" v-model="searchForm.goodsOrder" autocomplete="off" placeholder="订单编号"></el-input>
+        <el-input :clearable="true" style="width: 120px;" v-model="searchForm.orderNumber" autocomplete="off" placeholder="订单编号"></el-input>
         <el-select v-model="selectedOrderType" clearable  placeholder="订单类型" style="width: 120px;">
           <el-option label="销售订单" value="0"/>
           <el-option label="销售退货" value="1"/>
         </el-select>
         <el-input :clearable="true" style="width: 120px;" v-model="searchForm.goodsName" autocomplete="off" placeholder="货品名称"></el-input>
-        <el-input :clearable="true" style="width: 120px;" v-model="searchForm.supName" autocomplete="off" placeholder="客户"></el-input>
-        <el-select v-model="selectedRepo" filterable clearable  placeholder="仓库" style="width: 120px;">
+        <el-input :clearable="true" style="width: 120px;" v-model="searchForm.cusName" autocomplete="off" placeholder="客户"></el-input>
+        <el-select v-model="searchForm.repoId" filterable clearable  placeholder="仓库" style="width: 120px;">
           <el-option
             v-for="item in repoOptions"
             :key="item.id"
@@ -59,6 +59,9 @@
             <el-form-item label="货品编号">
               <span>{{ props.row.goods.goodOrder }}</span>
             </el-form-item>
+            <el-form-item label="订单类型">
+              <span>{{ props.row.s_o_type == 0 || props.row.s_o_type == null || props.row.s_o_type == undefined || props.row.s_o_type == '' || props.row.s_o_type == -1  ? '销售订单' : '销售退单'}}</span>
+            </el-form-item>
             <el-form-item label="货品名称">
               <span><el-tag :type="props.row.tag">{{ props.row.goods.goodsName }}</el-tag></span>
             </el-form-item>
@@ -66,7 +69,7 @@
               <span>{{ props.row.goods.size }}</span>
             </el-form-item>
             <el-form-item label="货品类型">
-              <span>{{ props.row.goods.type }}</span>
+              <span>{{ props.row.goods.g_type }}</span>
             </el-form-item>
             <el-form-item label="计量单位">
               <span>{{ props.row.goods.unit }}</span>
@@ -172,7 +175,7 @@
             size="mini"
             type="danger"
             circle
-            @click="handleDelete(scope.row.id, scope.row.index, false)"
+            @click="handleCancel(scope.row.id, scope.row.index, false)"
           >退单</el-button>
         </template>
       </el-table-column>
@@ -202,67 +205,86 @@
           pageSize: 10, //每页显示条目个数
           searchForm: {
             goodsName: '',
-            goodsOrder: '',
-            type: '',
-            size: '',
-            buyPrice: 0.0,
-            salePrice: 0.0
+            orderNumber: '',
+            supName: '',
+            empName: '',
+            repoId: ''
           },
           selectedOrderType: '',
           repoOptions: [],
           selectedRepo: '',
-          selectedCheckState: ''
+          selectedCheckState: '',
+          checkboxSelectData: []
         }
       },
       methods: {
         fetchTableData () {
-          let toRemoteParams = new URLSearchParams();
-          //toRemoteParams.append('goods', this.searchForm);
-          toRemoteParams.append('pageEntity', { currentPage: this.currentPage, pageSize: this.pageSize });
-          this.$http({
+         /* let toRemoteParams = new URLSearchParams();
+          toRemoteParams.append('pageEntity', { currentPage: this.currentPage, pageSize: this.pageSize });*/
+          this.isNotNulled(this.selectedCheckState) ? this.searchForm.checkState = this.selectedCheckState : this.searchForm.checkState = -1;
+          this.isNotNulled(this.selectedOrderType) ? this.searchForm.s_o_type = this.selectedOrderType : this.searchForm.s_o_type = -1;
+          let _this = this;
+          $.ajax({
             url: '/api/saleManage/saleOrder/queryAllSaleOrder',
             method: 'post',
-            data: toRemoteParams
-          }).then(res => {
-            let _this = this;
-            this.total = res.data.count;
-            let tag = ['info', 'success', 'warning', 'danger'];
-            let tempData = res.data.list.filter((value, index, arr) => {
-              value.tag = tag[this.randomData(-1, 3)];
-              value.inTime = this.formatTimeStampToTime(value.inTime, false);
-              value.creatime = this.formatTimeStampToTime(value.creatime, false);
-              value.checkTime = this.formatTimeStampToTime(value.checkTime, false);
-              value.checkStateStr = value.checkState == 1 ? '待审批' : value.checkState == 2 ? '审批不通过' : value.checkState == 3 ? "审批通过" : '待审批';
-              $.ajax({ //获取商品图片
-                url: '/api/baseConfig/goods/getGoodsImg',
-                async: false,
-                dataType: 'json',
-                data: { id: value.goods.g_id },
-                success: function (res) {
-                  switch (res) {
-                    case '' : //如果头像不存在，即用户没有设置头像
-                      value.goods.picture = goodsDefaultIcon;
-                      break;
-                    default :
-                      value.goods.picture = 'data:image/png;base64,' + res
+            dataType: 'json',
+            data: this.searchForm,
+            async: false,
+            success: function (res) {
+              _this.total = res.count;
+              let tag = ['info', 'success', 'warning', 'danger'];
+              let tempData = res.list.filter((value, index, arr) => {
+                value.tag = tag[_this.randomData(-1, 3)];
+                value.inTime = _this.formatTimeStampToTime(value.inTime, false);
+                value.creatime = _this.formatTimeStampToTime(value.creatime, false);
+                value.checkTime = _this.formatTimeStampToTime(value.checkTime, false);
+                value.checkStateStr = value.checkState == 1 ? '待审批' : value.checkState == 2 ? '审批不通过' : value.checkState == 3 ? "审批通过" : '待审批';
+                $.ajax({ //获取商品图片
+                  url: '/api/baseConfig/goods/getGoodsImg',
+                  async: false,
+                  dataType: 'json',
+                  data: { id: value.goods.g_id },
+                  success: function (res) {
+                    switch (res) {
+                      case '' : //如果头像不存在，即用户没有设置头像
+                        value.goods.picture = goodsDefaultIcon;
+                        break;
+                      default :
+                        value.goods.picture = 'data:image/png;base64,' + res
+                    }
+                  },
+                  error: function (e) {
+                    _this.$message({
+                      type: 'error',
+                      message: '请求服务器获取商品图片失败',
+                      showClose: true
+                    });
                   }
-                },
-                error: function (e) {
-                  _this.$message({
-                    type: 'error',
-                    message: '请求服务器获取商品图片失败',
-                    showClose: true
-                  });
-                }
+                });
+                return arr;
               });
-              return arr;
-            });
-            this.tableData = tempData;
+              _this.tableData = tempData;
+            },
+            error: function () {
+              _this.$message.error({
+                showClose: true,
+                duration: 2000,
+                message: '获取货品信息失败'
+              });
+            }
+          });
+        },
+        fetchRepo () {
+          this.$http({
+            url: '/api/baseConfig/repo/queryAllRepo',
+            method: 'post'
+          }).then(res => {
+            this.repoOptions = res.data.list;
           }).catch(() => {
             this.$message.error({
               showClose: true,
               duration: 2000,
-              message: '获取货品信息失败'
+              message: '获取仓库信息失败'
             });
           });
         },
@@ -288,21 +310,129 @@
             this.$emit('headCallBack', '/stockView');
           });
         },
-        onTableChange () {
-
+        onTableChange (selection) {
+          switch (selection.length) {
+            case 0 :
+              this.checkboxSelectData = [];
+              break;
+            default:
+              this.checkboxSelectData = selection;
+          }
         },
         handleDelete () {
 
         },
         handleExport () {
-
+          if (this.checkboxSelectData.length == 0) {
+            this.$message.error({
+              showClose: true,
+              duration: 2000,
+              message: '请选择需要导出的数据'
+            });
+            return;
+          }
+          let requiredAttr = ['orderNumber', 's_o_type', 'goods', 'unitPrice', 'totalPrice', 'count', 'customer', 'creatime', 'state', 'repository',
+            'takeTime', 'employee', 'checkStateStr', 'checkTime', 'user'];
+          let copyData = [];
+          this.checkboxSelectData.forEach((value, index, arr) => {
+            let obj = {};
+            Object.keys(value).forEach((val, key, array) => {
+              if ($.inArray(val, requiredAttr) > -1) {
+                if (val == 'goods') {
+                  obj.goodOrder = value.goods.goodOrder;
+                  obj.goodsName = value.goods.goodsName;
+                  obj.size = value.goods.size;
+                  obj.g_type = value.goods.g_type;
+                  obj.unit = value.goods.unit;
+                  return true;
+                }
+                if (val == 'customer') {
+                  obj.cusName = value.customer.cusName;
+                  return true;
+                }
+                if (val == 'repository') {
+                  obj.repoName = value.repository.repoName;
+                  return true;
+                }
+                if (val == 'employee') {
+                  obj.empName = value.employee.empName;
+                  return true;
+                }
+                if (val == 'user') {
+                  obj.userName = value.user == undefined || value.user == null ? "" : value.user[0].userName;
+                  return true;
+                }
+                if (val == 'state') {
+                  obj.state = value.state == 0 ? "已付款" : '未付款';
+                  return true;
+                }
+                if (val == 's_o_type') {
+                  obj.s_o_type = value.s_o_type == 0 ? "采购订单" : '采购退单';
+                  return true;
+                }
+                obj[val] = value[val];
+              }
+            });
+            copyData.push(obj);
+          });
+          let newdata = new URLSearchParams();
+          newdata.append("data", JSON.stringify(copyData));
+          window.open('/api/saleManage/saleOrder/exportSOrderInfoToExcel?data=' + newdata, '_blank');
         },
-        handleEdit () {
-
+        handleCancel (id, index, dulpicate) {
+          if (dulpicate && this.checkboxSelectData.length == 0) {
+            this.$message.error({
+              showClose: true,
+              duration: 2000,
+              message: '请选择需要退单的行'
+            });
+            return;
+          }
+          this.$confirm('确定要退单吗', '系统提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            let ids = [];
+            switch (dulpicate) {
+              case true :
+                this.checkboxSelectData.forEach((value, index, arr) => {
+                  ids.push(value.id);
+                });
+                break;
+            }
+            this.$http.get('/api/saleManage/saleOrder/saleOrderCancel', {
+              params: {
+                id: dulpicate ? ids.join(",") : id
+              }
+            }).then(res => {
+              switch (res.data.success) {
+                case true :
+                  this.$message.success({
+                    showClose: true,
+                    message: '退单成功'
+                  });
+                  this.fetchTableData();
+                  break;
+                default :
+                  this.$message.error({
+                    showClose: true,
+                    message: !this.isNotNulled(res.data.errMsg) ? "退单失败" : res.data.errMsg
+                  });
+              }
+            }).catch(() => {
+              this.$message({
+                showClose: true,
+                type: 'error',
+                message: '服务器请求失败'
+              });
+            });
+          });
         }
       },
       created () {
         this.fetchTableData();
+        this.fetchRepo();
       }
     }
 </script>

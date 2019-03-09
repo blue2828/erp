@@ -10,13 +10,13 @@
         <span style="color: #606266;">日期</span>
         <el-date-picker type="daterange" v-model="daterange" range-separator="至"
                         start-placeholder="开始日期" end-placeholder="结束日期"/>
-        <el-button @click="btnClick(index, value, false, true)" :key="index"  v-for="(value, index) in secodeBtns" :type="value.type" :size="value.size">{{ value.text }}</el-button>
+        <el-button @click="btnClick(index, value, false, true)" :key="index" v-for="(value, index) in secodeBtns" :type="value.type" :size="value.size">{{ value.text }}</el-button>
       </el-col>
     </el-row>
     <el-row>
       <div>
-        <span style="color: #606266;font-weight: bold;">销售总额：<span style="font-weight: normal;color: #1AB394;">￥{{ parseFloat(buyMoneyInTitle) == NaN || new Number(buyMoneyInTitle).toFixed(2) == 0.00 ? 0.00 : buyMoneyInTitle }}</span></span>
-        <span style="color: #606266;font-weight: bold;margin-left: 40px;">销售笔数：<span style="font-weight: normal;color: #1AB394;">{{ buyCountInTitle == '' ? 0 : buyCountInTitle }}</span>笔</span></div>
+        <span style="color: #606266;font-weight: bold;">销售总额：<span style="font-weight: normal;color: #1AB394;">￥{{ parseFloat(saleMoneyInTitle) == NaN || new Number(saleMoneyInTitle).toFixed(2) == 0.00 ? 0.00 : saleMoneyInTitle }}</span></span>
+        <span style="color: #606266;font-weight: bold;margin-left: 40px;">销售笔数：<span style="font-weight: normal;color: #1AB394;">{{ saleCountInTitle == '' ? 0 : saleCountInTitle }}</span>笔</span></div>
     </el-row>
     <el-row>
       <div :id="echarsId" style="width: 80vw;height: 300px;"></div>
@@ -70,10 +70,10 @@
           { type: 'primary', size: 'mini', text: '查询' }
         ],
         daterange: this.thisWeek(),
-        buyMoneyInTitle: 0.00,
-        buyCountInTitle: 0,
+        saleMoneyInTitle: 0.00,
+        saleCountInTitle: 0,
         xAxisDate: ['周一','周二','周三','周四','周五','周六','周日'],
-        buyMoneyInXAxis: [],
+        saleMoneyInXAxis: [],
         echarsId: 'echarsId',
         currentClickBtn: {},
         tableTitleTotalMoney: '0.00',
@@ -180,13 +180,13 @@
               name: '销售金额',
               type: 'line',
               stack: '总量',
-              data: this.buyMoneyInXAxis
+              data: this.saleMoneyInXAxis
             }
           ]
         };
         myChart.setOption(option);
       },
-      fetchDatas () {
+      fetchDatas () { //获取订单数据
         let selectedSecondBtn = this.secodeBtns.filter((val, index, arr) => {
           return val.type == 'success';
         });
@@ -232,15 +232,14 @@
               tableDs.push(val);
             });
             that.tableData = tableDs;
-            let buyMoneyInTitle = 0.00;
-            let buyCountInTitle = 0;
+            let saleMoneyInTitle = 0.00;
+            let saleCountInTitle = 0;
             tempMoneyArr.forEach(val => {
-              buyMoneyInTitle += parseFloat(val);
+              saleMoneyInTitle += parseFloat(val);
             });
-            that.buyMoneyInXAxis = tempMoneyArr;
-            that.buyMoneyInTitle = buyMoneyInTitle;
-            that.buyCountInTitle = res.count;
-            that.tableTitleTotalMoney = `销售额(合计：￥${buyMoneyInTitle})`;
+            that.saleMoneyInTitle = saleMoneyInTitle;
+            that.saleCountInTitle = res.count;
+            that.tableTitleTotalMoney = `销售额(合计：￥${saleMoneyInTitle})`;
             that.tableTitleTotalCount =  `销售笔数(合计：${ res.count == 0 ? 0 : res.count })`;
             switch (that.currentClickBtn.whichBtns) {
               case 0 :
@@ -249,6 +248,37 @@
               default :
                 that.handleAfterFetch();
             }
+            let tempIndexArr = [];
+            let selectedSecondBtn = that.secodeBtns.filter((val, index, arr) => {
+              return val.type == 'success';
+            });
+            let queryDateOp = selectedSecondBtn[0];
+            let tempMoneyInXAxisArr = [];
+            //let week = ['周一','周二','周三','周四','周五','周六','周日'];
+            if (that.xAxisDate[0].indexOf('周') > -1) {
+              tableDs.forEach((val, key, arr) => {
+                tempIndexArr.push({ index: new Date(val.creatime).getDay() || 7, money: val.totalPrice });
+              });
+            } else if (queryDateOp.text.indexOf('月') > -1) {
+              tableDs.forEach((val, key, arr) => {
+                if (that.xAxisDate.indexOf(val.creatime.substring(0, val.creatime.lastIndexOf("-"))) > -1)
+                  tempIndexArr.push({ index: that.xAxisDate.indexOf(val.creatime.substring(0, val.creatime.lastIndexOf("-"))), money: val.totalPrice });
+              });
+            } else {
+              tableDs.forEach((val, key, arr) => {
+                if (that.xAxisDate.indexOf(val.creatime) > -1)
+                  tempIndexArr.push({ index: that.xAxisDate.indexOf(val.creatime), money: val.totalPrice });
+              });
+            }
+            for (let what = 0; what < that.xAxisDate.length; what ++) {
+              tempIndexArr.forEach((val, index, arr) => {
+                if (val.index == what)
+                  tempMoneyInXAxisArr.push(val.money);
+                else
+                  tempMoneyInXAxisArr.push('0');
+              });
+            }
+            that.saleMoneyInXAxis = tempMoneyInXAxisArr;
             //that.xAxisDate = that.daterange;
           }
         });
@@ -414,7 +444,7 @@
       }
     },
     watch : {
-      buyMoneyInXAxis: function () {
+      saleMoneyInXAxis: function () {
         this.drawEchars();
       },
       xAxisDate: function () {

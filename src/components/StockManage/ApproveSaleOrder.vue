@@ -59,6 +59,9 @@
             <el-form-item label="货品编号">
               <span>{{ props.row.goods.goodOrder }}</span>
             </el-form-item>
+            <el-form-item label="订单类型">
+              <span>{{ props.row.s_o_type == 0 || props.row.s_o_type == null || props.row.s_o_type == undefined || props.row.s_o_type == '' || props.row.s_o_type == -1  ? '销售订单' : '销售退单'}}</span>
+            </el-form-item>
             <el-form-item label="货品名称">
               <span><el-tag :type="props.row.tag">{{ props.row.goods.goodsName }}</el-tag></span>
             </el-form-item>
@@ -315,6 +318,7 @@
           }).then(() => {
             $.post('/api/saleManage/saleOrder/approveSaleOrder', {
               checkState: approveOp ? 3 : 2,
+              id: row.id
             }, (res) => {
               switch (res.success) {
                 case true :

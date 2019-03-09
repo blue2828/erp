@@ -71,7 +71,7 @@
         </el-row>
         <el-row>
           <el-col :span="10">
-            <el-form-item label="员工编号" prop="code" :label-width="formLabelWidth" v-if="showExtraFormItem">
+            <el-form-item label="关联员工" prop="code" :label-width="formLabelWidth" v-if="showExtraFormItem">
               <el-select v-model="selectedEp" filterable clearable  placeholder="请选择">
                 <el-option
                   v-for="item in epOptions"
