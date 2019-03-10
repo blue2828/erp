@@ -1,5 +1,49 @@
 <template>
   <div>
+    <el-dialog :modal-append-to-body="false" :title="dialogTitle" :visible.sync="dialogFormVisible">
+      <el-form :model="form" :hide-required-asterisk="true" ref="repoForm" :status-icon="true">
+        <el-row>
+          <el-col :span="10">
+            <el-form-item label="仓库名称" :label-width="formLabelWidth"
+                          prop="repoName"
+                          :rules="[{ required: true, message: '仓库名称不能为空' }]"
+            >
+              <el-input :clearable="true" v-model="form.repoName" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-col :span="2"><div style="border: 1px solid white;"></div></el-col>
+          </el-col>
+          <el-col :span="10">
+            <el-form-item label="地址" :label-width="formLabelWidth"
+                          prop="address"
+                          :rules="[{ required: true, message: '地址不能为空' }]"
+            >
+              <el-input :clearable="true" v-model="form.address" autocomplete="off"></el-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="10">
+            <el-form-item label="管理员" :label-width="formLabelWidth"
+                          prop="adminId"
+            >
+              <el-select v-model="selectedEp" filterable clearable  placeholder="请选择">
+                <el-option
+                  v-for="item in epOptions"
+                  :key="item.id"
+                  :label="item.empName"
+                  :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-col :span="2"><div style="border: 1px solid white;"></div></el-col>
+          </el-col>
+        </el-row>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="danger" @click="closeInfoFrame">取 消</el-button>
+        <el-button type="primary" @click="handleSubmit" :loading="showBtnLoading">确 定</el-button>
+      </div>
+    </el-dialog>
     <el-row>
       <el-col :span="2"><el-button type="success" icon="el-icon-plus" @click="handleAdd">新增</el-button></el-col>
       <el-col :span="3"><el-button type="danger" icon="el-icon-delete" @click="handleDelete(checkboxSelectData, -1, true)">批量删除</el-button></el-col>
@@ -118,7 +162,18 @@
           currentPage: 1,
           total: 0, //总条目数
           pageSize: 10, //每页显示条目个数
-          searchSth: ''
+          searchSth: '',
+          dialogTitle: '',
+          form: {
+
+          },
+          showBtnLoading: false,
+          dialogTitle: '',
+          dialogFormVisible: false,
+          checkboxSelectData: [],
+          formLabelWidth: '120px',
+          epOptions: [],
+          selectedEp: ''
         }
       },
       methods: {
@@ -159,24 +214,126 @@
           this.currentPage = val;
           this.fetchTableData();
         },
-        onTableChange () {
-
+        currentChange (val) {
+          this.currentPage = val;
+          this.fetchTableData();
         },
-        handleDelete () {
-
+        onTableChange (selection) {
+          switch (selection.length) {
+            case 0 :
+              this.checkboxSelectData = [];
+              break;
+            default:
+              this.checkboxSelectData = selection;
+          }
         },
-        handleEdit () {
-
+        closeInfoFrame () {
+          this.dialogFormVisible = false;
+          this.$refs.repoForm.resetFields();
+        },
+        handleDelete (id, index, dulpicate) {
+          if (dulpicate && this.checkboxSelectData.length == 0) {
+            this.$message.error({
+              showClose: true,
+              duration: 2000,
+              message: '请选择需要删除的数据'
+            });
+            return;
+          }
+          this.$confirm('确定要删除吗', '系统提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          });
+        },
+        handleEdit (row) {
+          this.dialogTitle = '编辑仓库';
+          this.dialogFormVisible = true;
+          this.form = row;
+          this.selectedEp = row.employee.id;
         },
         handleAdd () {
-
+          this.dialogTitle = '新增仓库';
+          this.dialogFormVisible = true;
+        },
+        handleSubmit () { //提交表单
+          this.showBtnLoading = true;
+          let params = this.form;
+          this.$refs['repoForm'].validate(valid => {
+            switch (valid) {
+              case true:
+                /* this.$http.get('/api/baseConfig/goods/editGoods', { //请求保存订单的ajax /api表示的事http://localhost:8088/
+                   params: params
+                 }).then(res => {
+                   this.showBtnLoading = false;
+                   switch (res.data.success) {
+                     case true :
+                       this.$message({
+                         type: 'success',
+                         showClose: true,
+                         message: '保存成功',
+                         duration: 2000
+                       });
+                       let timer = setTimeout(() => {
+                         this.showProgress = false;
+                         clearTimeout(timer);
+                       }, 1000);
+                       this.dialogFormVisible = false;
+                       this.closeInfoFrame();
+                       break;
+                     default :
+                       this.$message.error({
+                         showClose: true,
+                         message: res.data.errMsg,
+                         duration: 2000
+                       });
+                   }
+                   this.fetchTableData();
+                   this.dialogFormVisible = false;
+                 }).catch(() => {
+                   this.fetchTableData();
+                   this.showBtnLoading = false;
+                   this.$message.error({
+                     showClose: true,
+                     message: '连接服务器失败',
+                     duration: 2000
+                   });
+                 });*/
+                break;
+              default:
+                this.showBtnLoading = false;
+                return false;
+            }
+          });
         },
         handleExport () {
 
+        },
+        getEpDataSource () {
+          let data;
+          let that = this;
+          $.ajax({
+            url: '/api/baseConfig/employee/queryAllEmployee',
+            data: { currentPage: 1 },
+            dataType: 'json',
+            async: false,
+            success: function (res) {
+              that.epOptions = res.employeeInfo;
+            },
+            error: function () {
+              that.$message.error({
+                showClose: true,
+                message: '获取员工数据失败',
+                duration: 2000
+              });
+            }
+          });
+          return data;
         }
       },
       created () {
         this.fetchTableData();
+        this.getEpDataSource();
       }
     }
 </script>

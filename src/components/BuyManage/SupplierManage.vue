@@ -14,7 +14,7 @@
           </el-col>
           <el-col :span="10">
             <el-form-item label="联系人" :label-width="formLabelWidth"
-                          prop="unit"
+                          prop="linkMan"
                           :rules="[{ required: true, message: '联系人不能为空' }]"
             >
               <el-input :clearable="true" v-model="form.linkMan" autocomplete="off"></el-input>
@@ -188,13 +188,15 @@
           formLabelWidth: '120px',
           showBtnLoading: false,
           form: {
+            id: '',
             supName: '',
             linkMan: '',
             mobile: '',
             address: '',
             mark: '',
           },
-          checkboxSelectData: []
+          checkboxSelectData: [],
+          isEdit: false
         }
       },
       methods: {
@@ -265,10 +267,12 @@
           this.dialogTitle = '编辑供应商';
           this.dialogFormVisible = true;
           this.form = row;
+          this.isEdit = true;
         },
         handleAdd () {
           this.dialogTitle = '新增供应商';
           this.dialogFormVisible = true;
+          this.isEdit = false;
         },
         handleExport () {
 
@@ -280,11 +284,11 @@
         handleSubmit () { //提交表单
           this.showBtnLoading = true;
           let params = this.form;
-          this.currentEditGood = params;
+          params.isEdit = this.isEdit;
           this.$refs['supplierForm'].validate(valid => {
             switch (valid) {
               case true:
-               /* this.$http.get('/api/baseConfig/goods/editGoods', { //请求保存订单的ajax /api表示的事http://localhost:8088/
+                this.$http.get('/api/buyManage/supplier/saveSupplier', { //请求保存订单的ajax /api表示的事http://localhost:8088/
                   params: params
                 }).then(res => {
                   this.showBtnLoading = false;
@@ -320,7 +324,7 @@
                     message: '连接服务器失败',
                     duration: 2000
                   });
-                });*/
+                });
                 break;
               default:
                 this.showBtnLoading = false;
